@@ -10,6 +10,10 @@ import com.scene.Scene;
  *
  */
 public abstract  class Enemy implements Runnable{
+//人物高度
+protected int height;
+//人物宽度
+protected int width;
 //x坐标
 protected int x;
 //y坐标
@@ -32,7 +36,7 @@ public Enemy(int x,int y){
 	startX=x;
 	startY=y;
 }
-/**初始化各种数据,场景重置时调用
+/**恢复初始数据,场景重置时调用
  */
 public void init(){
 	this.x=startX;
@@ -42,8 +46,23 @@ public void init(){
 /**死亡后调用的方法
  * 
  */
-public void afterDead(){
+protected void afterDead(){
 	//将自己从场景中移除，并添加到被消灭的敌人集合里
+	scene.getAllEnemies().remove(this);
+	scene.getRemovedEnemies().add(this);
+}
+/**
+ * 判断是否死亡
+ * @return
+ */
+protected abstract boolean isDead();
+protected  boolean isCanLeft(){
+	//TODO 根据障碍物判断是否可以向左移动
+	return false;
+}
+protected  boolean isCanRight(){
+	//TODO 根据障碍物判断是否可以向右移动
+	return false;
 }
 public int getX() {
 	return x;
@@ -68,6 +87,19 @@ public int getStartY() {
 }
 public void setStartY(int startY) {
 	this.startY = startY;
+}
+
+public int getHeight() {
+	return height;
+}
+public void setHeight(int height) {
+	this.height = height;
+}
+public int getWidth() {
+	return width;
+}
+public void setWidth(int width) {
+	this.width = width;
 }
 public BufferedImage getShowImage() {
 	return showImage;

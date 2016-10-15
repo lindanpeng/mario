@@ -17,4 +17,10 @@ public class Flower extends Enemy {
 
 	}
 
+	@Override
+	protected boolean isDead() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
