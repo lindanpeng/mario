@@ -35,10 +35,16 @@ public void paint(Graphics g){
 	for(Enemy enemy:scene.getAllEnemies()){
 		bg.drawImage(enemy.getShowImage(),enemy.getX(),enemy.getY(),null);
 	}
-	//绘制障碍物
+	//TODO 绘制障碍物
 	
-	//绘制mario
+	//TODO 绘制mario
 	g.drawImage(image, 0, 0, null);
+}
+public void setScene(Scene scene) {
+	this.scene = scene;
+}
+public void setMario(Mario mario) {
+	this.mario = mario;
 }
 
 }
