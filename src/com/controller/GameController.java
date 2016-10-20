@@ -41,8 +41,6 @@ private Map<KeyCodeAndType,Method> marioAction;
 public GameController(GameFrame gameFrame){
 	this.gameFrame=gameFrame;
 	this.gamePane=gameFrame.getGamePane();
-	myKeyListenter=new MyKeyListenter(mario);
-
 	this.init();
 }
 /**
@@ -58,7 +56,7 @@ public void init(){
      nowScene=scenes.get(0);
 	//获取mario数据并创建对象
 	 mario=new Mario(0,480, 3);
-	 
+	 myKeyListenter=new MyKeyListenter(mario);
 	 gamePane.setScene(nowScene);
 	 gamePane.setMario(mario);
 }

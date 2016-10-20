@@ -11,6 +11,10 @@ import javax.swing.JFrame;
  *
  */
 public class FrameUtil {
+	/**
+	 * 使窗體居中
+	 * @param jf
+	 */
 	public static void setFrameCenter(JFrame jf){
 		 Toolkit toolkit=Toolkit.getDefaultToolkit();
 		 Dimension screen=toolkit.getScreenSize();
