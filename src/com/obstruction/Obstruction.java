@@ -1,6 +1,8 @@
 package com.obstruction;
 
 import java.awt.image.BufferedImage;
+
+import com.ui.Img;
 /**
  * 障碍物
  * @author 林丹
@@ -29,7 +31,7 @@ public class Obstruction {
 	 * 初始化各种数据
 	 */
 	public void init() {
-          
+		showImage=Img.allObstructionImage.get(type);
 	}
 
 	public int getX() {

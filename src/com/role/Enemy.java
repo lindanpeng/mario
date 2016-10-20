@@ -42,6 +42,7 @@ public void init(){
 	this.x=startX;
 	this.y=startY;
 	showImage=images.get(0);
+	new Thread(this).start();
 }
 /**死亡后调用的方法
  * 

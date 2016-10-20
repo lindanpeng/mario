@@ -3,11 +3,14 @@ package com.role;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.constant.CommonConstant;
 import com.obstruction.Obstruction;
 import com.scene.Scene;
+import com.ui.Img;
 
 /**
  * 超级玛丽类
@@ -27,10 +30,10 @@ public class Mario implements Runnable {
 	private int startX;
 	// 起始y坐标
 	private int startY;
-	// 水平移动速度
-	private int xspeed;
-	// 垂直移动速度
-	private int yspeed;
+	//TODO 水平移动速度
+	private int xspeed=10;
+	//TODO 垂直移动速度
+	private int yspeed=10;
 	// 生命数
 	private int life;
 	// 当前显示的图片
@@ -47,17 +50,28 @@ public class Mario implements Runnable {
 	private boolean isJumping;
 	// 跳跃次数,upTime*yspeed即为跳跃距离
 	private int upTimes;
-	// 跳跃次数最大值
-	private int upTimesMax;
-
-	public Mario(int x, int y, int life) throws NoSuchMethodException, SecurityException {
+	// 跳跃高度
+	private int jumpHeight;
+    //死亡标志
+	private boolean isDead;
+	//辅助显示图片
+	private int posture;
+	public Mario(int x, int y, int life){
 		startX = x;
-		startX = y;
+		startY = y;
 		this.life = life;
-		//methods.put("rightStop", this.getClass().getMethod("rightStop"));
-		//methods.put("leftStop", this.getClass().getMethod("leftStop"));
-		methods.put("leftMove", this.getClass().getMethod("leftMove"));
-		methods.put("rightMove", this.getClass().getMethod("rightMove"));
+		images=Img.allMarioImage;
+		methods=new HashMap<String, Method>();
+		try {
+			methods.put("rightStop", this.getClass().getMethod("rightStop"));
+			methods.put("leftStop", this.getClass().getMethod("leftStop"));
+			methods.put("leftMove", this.getClass().getMethod("leftMove"));
+			methods.put("rightMove", this.getClass().getMethod("rightMove"));
+		} catch (NoSuchMethodException | SecurityException e) {
+		
+			e.printStackTrace();
+		}
+	
 
 	}
 
@@ -69,6 +83,7 @@ public class Mario implements Runnable {
 		this.y = startY;
 		status = "rightStop";
 		showImage = images.get(0);
+		new Thread(this).start();
 	}
 
 	/**
@@ -77,6 +92,7 @@ public class Mario implements Runnable {
 	public void leftMove() {
 		x -= xspeed;
 		status = "leftMove";
+		System.out.println(status);
 	}
 
 	/**
@@ -85,6 +101,7 @@ public class Mario implements Runnable {
 	public void rightMove() {
 		x += xspeed;
 		status = "rightMove";
+		System.out.println(status);
 	}
 
 	/**
@@ -92,7 +109,7 @@ public class Mario implements Runnable {
 	 */
 	public void leftStop() {
 		status = "leftStop";
-
+		System.out.println(status);
 	}
 
 	/**
@@ -100,12 +117,13 @@ public class Mario implements Runnable {
 	 */
 	public void rightStop() {
 		status = "rightStop";
+		System.out.println(status);
 	}
 
 	public void toJump() {
 		if (!isJumping) {
 			this.isJumping = true;
-			upTimes = upTimesMax;
+			//upTimes = upTimesMax;
 		}
 	}
 
@@ -134,7 +152,25 @@ public class Mario implements Runnable {
 	 * 根据状态显示图片，注意移动的时候图片要不断切换
 	 */
 	public void showImageWithStatus() {
-
+         if(status.equals("rightMove")){
+        	 posture = (++posture) % 5;
+         }
+         else if(status.equals("leftMove")){
+        	 posture = (++posture) % 5 + 5;
+         }
+         else if(status.equals("rightStop")){
+        	 posture = 0;
+         }
+         else if(status.equals("leftStop")){
+        	 posture = 5;
+         }
+         else if(status.equals("leftJump")){
+        	 posture = 9;
+         }
+         else if(status.equals("rightJump")){
+        	 posture = 4;
+         }
+     	showImage = images.get(posture);// 显示状态图
 	}
 
 	/**
@@ -177,11 +213,9 @@ public class Mario implements Runnable {
 				boolean isCanRight = isCanRight();
 				// 是否着陆的标志
 				boolean isOnland = isOnland();
-
-				// if(isCanLeft()&&status.startsWith("left")||isCanRight()&&status.startsWith("right"))
 				methods.get(status).invoke(this);
                 showImageWithStatus();
-				Thread.sleep(50);
+				Thread.sleep(CommonConstant.sleepTime);
 			} catch (IllegalAccessException e1) {
 
 				e1.printStackTrace();

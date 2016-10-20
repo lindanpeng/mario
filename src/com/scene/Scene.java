@@ -1,6 +1,7 @@
 package com.scene;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.obstruction.Obstruction;
@@ -14,9 +15,9 @@ private List<Enemy> allEnemies;
 //当前在场景中的所有障碍物
 private List<Obstruction> allObstructions;
 //所有被消灭的敌人
-private List<Enemy> removedEnemies;
+private List<Enemy> removedEnemies=new ArrayList<>();
 //所有被消灭的障碍物
-private List<Obstruction> removedObstructions;
+private List<Obstruction> removedObstructions=new ArrayList<>();
 public Scene(BufferedImage background,List<Enemy> enemies,List<Obstruction> obstructions){
 	this.background=background;
 	this.allEnemies=enemies;

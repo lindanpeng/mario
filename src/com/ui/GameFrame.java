@@ -1,38 +1,59 @@
 package com.ui;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-
 import javax.swing.JFrame;
 
-//import config.FrameConfig;
-//import config.GameConfig;
-//import ui.window.JPanelGame;
-//import util.FrameUtil;
+import com.controller.GameController;
+import com.util.FrameUtil;
+
+
 
 /**
  * 游戏主窗口
+ * 
  * @author Administrator
  *
  */
 public class GameFrame extends JFrame {
-	public GameFrame(){
-		// GameConfig cfg=ConfigFactory.getGameConfig();
-		//设置标题
-		 this.setTitle("mario");
-	   //设置默认关闭属性
+	//游戏运行面板
+	private GamePane gamePane;
+	//游戏控制器
+	private GameController gameController;
+	public GameFrame() {
+
+		//TODO 硬编码
+		int height=600;
+		int width=900;
+	    gamePane=new GamePane(width,height);
+	    
+		gameController=new GameController(this);
+		gameController.startGame();
+		gamePane.setIsStart(true);
+		// 设置标题
+		this.setTitle("超級玛丽");
+		// 设置默认关闭属性
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//设置窗口大小
-		this.setSize(1168,680);
-		//不允许用户改变大小
+		// 设置窗口大小
+		this.setSize(width + 6,height + 28);
+		//设置内容
+		this.setContentPane(gamePane);
+		// 不允许用户改变大小
 		this.setResizable(false);
 		//居中
-		Toolkit toolkit=Toolkit.getDefaultToolkit();
-		Dimension screen=toolkit.getScreenSize();
-        int x=(screen.width-this.getWidth())/2;
-    	int y=(screen.height-this.getHeight())/2-30;
-		this.setLocation(x,y);
+		FrameUtil.setFrameCenter(this);
+		//设置可见
+		
 		this.setVisible(true);
-		this.setContentPane(new StartPane());
 	}
+	
+	
+	public GamePane getGamePane() {
+		return gamePane;
+	}
+  public static void main(String[] args) {
+	GameFrame gameFrame=new GameFrame();
+	gameFrame.getGamePane().requestFocus();
+	gameFrame.getGamePane().requestFocus();
+	
+	
+}
 }
