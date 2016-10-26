@@ -5,6 +5,11 @@ public class KeyCodeAndType {
 private int code;
 //类型 0为press，1为release
 private int type;
+
+public KeyCodeAndType(int code,int type){
+	this.code=code;
+	this.type=type;
+}
 public int getCode() {
 	return code;
 }

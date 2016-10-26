@@ -1,14 +1,12 @@
 package com.role;
 
-import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.constant.CommonConstant;
-import com.obstruction.Obstruction;
+import com.constant.GameConstant;
+import com.controller.GameController;
 import com.scene.Scene;
 import com.ui.Img;
 
@@ -17,33 +15,17 @@ import com.ui.Img;
  * 
  * @author 贵安
  */
-public class Mario implements Runnable {
-	//人物高度
-	private int width=60;
-	//人物宽度
-	private int height=60;
-	// x坐标
-	private int x;
-	// y坐标
-	private int y;
-	// 起始x坐标
-	private int startX;
-	// 起始y坐标
-	private int startY;
-	//TODO 水平移动速度
-	private int xspeed=10;
-	//TODO 垂直移动速度
-	private int yspeed=10;
+public class Mario extends Role implements Runnable {
 	// 生命数
 	private int life;
-	// 当前显示的图片
-	private BufferedImage showImage;
-	// 所有图片
-	private List<BufferedImage> images;
-	// 当前的状态(左站立、右站立、左移动、右移动、左跳跃、右跳跃)
+    // 当前的状态(左站立、右站立、左移动、右移动、左跳跃、右跳跃)
 	private String status;
-	// 当前所处的场景
-	private Scene scene;
+	// 所处场景1
+	private Scene firstScene;
+	//所处场景2
+	private Scene secondScene;
+	//最后一个场景的顺序
+	private int lastSceneSort;
 	// 所有动态执行的方法
 	private Map<String, Method> methods;
 	// 是否跳跃标志
@@ -51,14 +33,15 @@ public class Mario implements Runnable {
 	// 跳跃次数,upTime*yspeed即为跳跃距离
 	private int upTimes;
 	// 跳跃高度
-	private int jumpHeight;
+	private int jumpHeight=240;
     //死亡标志
 	private boolean isDead;
 	//辅助显示图片
 	private int posture;
-	public Mario(int x, int y, int life){
-		startX = x;
-		startY = y;
+	private GameController gameController;
+	public Mario(int x, int y, int life,GameController gameController){
+		super(x, y);
+		this.gameController=gameController;
 		this.life = life;
 		images=Img.allMarioImage;
 		methods=new HashMap<String, Method>();
@@ -90,8 +73,10 @@ public class Mario implements Runnable {
 	 * 向左移动
 	 */
 	public void leftMove() {
-		x -= xspeed;
 		status = "leftMove";
+		if(this.x<=0)
+			return ;
+		x -= xspeed;
 		System.out.println(status);
 	}
 
@@ -99,8 +84,29 @@ public class Mario implements Runnable {
 	 * 向右移动
 	 */
 	public void rightMove() {
-		x += xspeed;
 		status = "rightMove";
+		//如果第一个场景已经移出画面
+		if(this.getFirstScene().getX()<=-GameConstant.SCENE_DEFAULT_WIDTH){
+			gameController.nextScene();
+		}
+	   //如果
+		if(this.x>=nowScene.getWidth()-this.width)
+			return;
+		//如果mario已经走出了第一个场景
+		if (this.firstScene.getX() <= -GameConstant.SCENE_DEFAULT_WIDTH/2)
+		{
+			nowScene=secondScene;
+		}
+		//如果尚未到达场景中间或者已经到达最后一个，则mario右移
+		if(this.x<=firstScene.getWidth()/2||firstScene==secondScene)
+		x += xspeed;
+		//否则场景左移
+		else
+			{
+			  firstScene.leftMove();
+			  secondScene.leftMove();
+			}
+
 		System.out.println(status);
 	}
 
@@ -215,7 +221,7 @@ public class Mario implements Runnable {
 				boolean isOnland = isOnland();
 				methods.get(status).invoke(this);
                 showImageWithStatus();
-				Thread.sleep(CommonConstant.sleepTime);
+				Thread.sleep(GameConstant.SLEEPTIME);
 			} catch (IllegalAccessException e1) {
 
 				e1.printStackTrace();
@@ -233,22 +239,6 @@ public class Mario implements Runnable {
 		}
 	}
 
-	public int getX() {
-		return x;
-	}
-
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public void setY(int y) {
-		this.y = y;
-	}
-
 	public int getLife() {
 		return life;
 	}
@@ -257,36 +247,28 @@ public class Mario implements Runnable {
 		this.life = life;
 	}
     
-	public int getWidth() {
-		return width;
+	public Scene getFirstScene() {
+		return firstScene;
 	}
 
-	public void setWidth(int width) {
-		this.width = width;
+	public void setFirstScene(Scene firstScene) {
+		this.firstScene = firstScene;
 	}
 
-	public int getHeight() {
-		return height;
+	public Scene getSecondScene() {
+		return secondScene;
 	}
 
-	public void setHeight(int height) {
-		this.height = height;
+	public void setSecondScene(Scene secondScene) {
+		this.secondScene = secondScene;
 	}
 
-	public BufferedImage getShowImage() {
-		return showImage;
+	public int getLastSceneSort() {
+		return lastSceneSort;
 	}
 
-	public void setShowImage(BufferedImage showImage) {
-		this.showImage = showImage;
-	}
-
-	public Scene getScene() {
-		return scene;
-	}
-
-	public void setScene(Scene scene) {
-		this.scene = scene;
+	public void setLastSceneSort(int lastSceneSort) {
+		this.lastSceneSort = lastSceneSort;
 	}
 
 }

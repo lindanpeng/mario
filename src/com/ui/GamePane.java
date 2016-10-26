@@ -17,20 +17,23 @@ import com.scene.Scene;
 import com.util.TimeUtil;
 
 public class GamePane extends JPanel {
-	// 游戏场景
-	private Scene scene;
+	// 游戏场景1
+	private Scene firstScene;
+	// 游戏场景2
+	private Scene secondScene;
 	// 超级玛丽
 	private Mario mario;
-	//画面宽度
+	// 画面宽度
 	private int width;
-	//画面高度
+	// 画面高度
 	private int height;
-    //游戏开始标志
+	// 游戏开始标志
 	private boolean isStart;
+
 	public GamePane(int width, int height) {
-    this.width=width;
-    this.height=height;
-    this.setSize(width, height);
+		this.width = width;
+		this.height = height;
+		this.setSize(width, height);
 	}
 
 	/**
@@ -38,11 +41,22 @@ public class GamePane extends JPanel {
 	 */
 	@Override
 	public void paint(Graphics g) {
-		if(!isStart)return;
+		if (!isStart)
+			return;
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		Graphics bg = image.getGraphics();
-		//绘制背景
-		bg.drawImage(scene.getBackground(),0,0, null);
+		/* ================场景一===================== */
+		drawScene(firstScene, bg);
+		/* ================场景二===================== */
+		drawScene(secondScene, bg);
+		// 绘制超级玛丽
+		bg.drawImage(mario.getShowImage(), mario.getX(), mario.getY(), null);
+		g.drawImage(image, 0, 0, null);
+	}
+
+	private void drawScene(Scene scene, Graphics bg) {
+		// 绘制背景
+		bg.drawImage(scene.getBackground(), scene.getX(), scene.getY(), null);
 		// 绘制敌人
 		for (Enemy enemy : scene.getAllEnemies()) {
 			bg.drawImage(enemy.getShowImage(), enemy.getX(), enemy.getY(), null);
@@ -51,20 +65,22 @@ public class GamePane extends JPanel {
 		for (Obstruction obstruction : scene.getAllObstructions()) {
 			bg.drawImage(obstruction.getShowImage(), obstruction.getX(), obstruction.getY(), null);
 		}
-		// 绘制超级玛丽
-		bg.drawImage(mario.getShowImage(),mario.getX(), mario.getY(), null);
-		g.drawImage(image, 0, 0, null);
 	}
 
-	public void setScene(Scene scene) {
-		this.scene = scene;
+	public void setFirstScene(Scene firstScene) {
+		this.firstScene = firstScene;
+	}
+
+	public void setSecondScene(Scene secondScene) {
+		this.secondScene = secondScene;
 	}
 
 	public void setMario(Mario mario) {
 		this.mario = mario;
 	}
+
 	public void setIsStart(Boolean isStart) {
 		this.isStart = isStart;
 	}
-    
+
 }
