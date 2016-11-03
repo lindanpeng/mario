@@ -2,32 +2,48 @@ package com.listener;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.text.AbstractDocument.LeafElement;
+
+import org.w3c.dom.ls.LSInput;
+
+import com.controller.GameController;
 import com.role.Mario;
 
 public class MyKeyListenter extends KeyAdapter {
-private Mario mario;
-public  MyKeyListenter(Mario mario) {
-	this.mario=mario;
-}
-@Override
-public void keyReleased(KeyEvent e) {
-	if (e.getKeyCode() == 37)
-		mario.leftStop();
-	if (e.getKeyCode() == 39)
-		mario.rightStop();
+   private GameController gameController;
+   private List<KeyCodeAndType> list=new ArrayList<>();
+	public MyKeyListenter(GameController gameController) {
+	this.gameController=gameController;
+	list.add(new KeyCodeAndType(37,1));
+	list.add(new KeyCodeAndType(39, 1));
+	list.add(new KeyCodeAndType(38, 0));
+	list.add(new KeyCodeAndType(37, 0));
+	list.add(new KeyCodeAndType(39, 0));
+	}
 
-}
+	@Override
+	public void keyReleased(KeyEvent e) {
+		if (e.getKeyCode() == 37)
+			gameController.doAction(list.get(0));
+		if (e.getKeyCode() == 39)
+			gameController.doAction(list.get(1));
+		
+	}
 
-@Override
-public void keyPressed(KeyEvent e) {
-	if (e.getKeyCode() == 37)
-		mario.leftMove();
-	if (e.getKeyCode() == 39)
-		mario.rightMove();
-	if (e.getKeyCode() == 32)
-		mario.jump();
-
-}
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == 37)
+			gameController.doAction(list.get(3));
+		if (e.getKeyCode() == 39)
+			gameController.doAction(list.get(4));
+		if (e.getKeyCode() == 38)
+			gameController.doAction(list.get(2));
+        if(e.getKeyCode()==16)
+        	gameController.pauseGame();
+        	
+	}
 
 }

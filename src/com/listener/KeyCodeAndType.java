@@ -3,7 +3,7 @@ package com.listener;
 public class KeyCodeAndType {
 //键盘对应码
 private int code;
-//类型 0为press，1为release
+//类型 0为press，1为release,2为type
 private int type;
 
 public KeyCodeAndType(int code,int type){

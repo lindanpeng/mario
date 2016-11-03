@@ -4,9 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.constant.DeadType;
 import com.constant.GameConstant;
 import com.controller.GameController;
+import com.gameobject.Coin;
+import com.gameobject.GameObject;
 import com.scene.Scene;
 import com.ui.Img;
 
@@ -18,43 +20,46 @@ import com.ui.Img;
 public class Mario extends Role implements Runnable {
 	// 生命数
 	private int life;
-    // 当前的状态(左站立、右站立、左移动、右移动、左跳跃、右跳跃)
+	// 当前的状态(左站立、右站立、左移动、右移动、左跳跃、右跳跃)
 	private String status;
 	// 所处场景1
 	private Scene firstScene;
-	//所处场景2
+	// 所处场景2
 	private Scene secondScene;
-	//最后一个场景的顺序
+	// 最后一个场景的顺序
 	private int lastSceneSort;
 	// 所有动态执行的方法
 	private Map<String, Method> methods;
 	// 是否跳跃标志
 	private boolean isJumping;
-	// 跳跃次数,upTime*yspeed即为跳跃距离
-	private int upTimes;
-	// 跳跃高度
-	private int jumpHeight=240;
-    //死亡标志
-	private boolean isDead;
-	//辅助显示图片
+	//是否二级跳跃
+	private boolean isSecondJumping; 
+	// 是否下落标志
+	private boolean isFalling;
+	// 已经跳跃的高度
+	private int jumpedHeight;
+	// 跳跃最大高度
+	private int maxJumpHeight;
+	// 分数
+	private int score;
+	// 辅助显示图片
 	private int posture;
+	// 游戏控制器
 	private GameController gameController;
-	public Mario(int x, int y, int life,GameController gameController){
-		super(x, y);
-		this.gameController=gameController;
+
+	public Mario(int x, int y, int life, GameController gameController) {
+		super(x, y, 44, 50, 10,20);
+		this.gameController = gameController;
 		this.life = life;
-		images=Img.allMarioImage;
-		methods=new HashMap<String, Method>();
+		images = Img.allMarioImage;
+		methods = new HashMap<String, Method>();
 		try {
-			methods.put("rightStop", this.getClass().getMethod("rightStop"));
-			methods.put("leftStop", this.getClass().getMethod("leftStop"));
 			methods.put("leftMove", this.getClass().getMethod("leftMove"));
 			methods.put("rightMove", this.getClass().getMethod("rightMove"));
 		} catch (NoSuchMethodException | SecurityException e) {
-		
+
 			e.printStackTrace();
 		}
-	
 
 	}
 
@@ -62,181 +67,303 @@ public class Mario extends Role implements Runnable {
 	 * 初始化数据
 	 */
 	public void init() {
-		this.x = startX;
-		this.y = startY;
 		status = "rightStop";
-		showImage = images.get(0);
-		new Thread(this).start();
+		firstScene.reset();
+		secondScene.reset();
+		firstScene.setX(0);
+		secondScene.setX(GameConstant.SCENE_DEFAULT_WIDTH);
+		nowScene = firstScene;
+		isSecondJumping=false;
+		isJumping=false;
+		isFalling=false;
+		maxJumpHeight=120;
+		super.init();
 	}
+
+	/**
+	 * 设置为左移动状态
+	 */
+	public void toLeftMove() {
+		status = "leftMove";
+		// System.out.println(status);
+	}
+
+	/**
+	 * 设置为右移动状态
+	 */
+	public void toRightMove() {
+		status = "rightMove";
+		// System.out.println(status);
+	}
+
+	/**
+	 * 设置左暂停状态
+	 */
+	public void toLeftStop() {
+		status = "leftStop";
+		// System.out.println(status);
+	}
+
+	/**
+	 * 设置为右暂停状态
+	 */
+	public void toRightStop() {
+		status = "rightStop";
+		// System.out.println(status);
+	}
+
+	/**
+	 * 设置为跳跃状态
+	 */
+	public void toJump() {
+		System.out.println(isJumping);
+		if (!isJumping) {
+			this.isJumping = true;
+	
+		}
+		else if(isJumping&&!isSecondJumping)
+			{
+			  this.isSecondJumping=true;
+			  
+			}
+}
 
 	/**
 	 * 向左移动
 	 */
 	public void leftMove() {
-		status = "leftMove";
-		if(this.x<=0)
-			return ;
+
+		if (this.x <= 0)
+			return;
 		x -= xspeed;
-		System.out.println(status);
 	}
 
 	/**
 	 * 向右移动
 	 */
 	public void rightMove() {
-		status = "rightMove";
-		//如果第一个场景已经移出画面
-		if(this.getFirstScene().getX()<=-GameConstant.SCENE_DEFAULT_WIDTH){
-			gameController.nextScene();
-		}
-	   //如果
-		if(this.x>=nowScene.getWidth()-this.width)
+		if(this.x>=GameConstant.SCENE_DEFAULT_WIDTH-this.width)
 			return;
-		//如果mario已经走出了第一个场景
-		if (this.firstScene.getX() <= -GameConstant.SCENE_DEFAULT_WIDTH/2)
-		{
-			nowScene=secondScene;
+		if (this.x <= firstScene.getWidth() / 2 || firstScene == secondScene)
+			x += xspeed;
+		
+		// 否则场景左移
+		else {
+			firstScene.leftMove();
+			secondScene.leftMove();
 		}
-		//如果尚未到达场景中间或者已经到达最后一个，则mario右移
-		if(this.x<=firstScene.getWidth()/2||firstScene==secondScene)
-		x += xspeed;
-		//否则场景左移
-		else
-			{
-			  firstScene.leftMove();
-			  secondScene.leftMove();
-			}
 
-		System.out.println(status);
-	}
-
-	/**
-	 * 左暂停
-	 */
-	public void leftStop() {
-		status = "leftStop";
-		System.out.println(status);
-	}
-
-	/**
-	 * 右暂停
-	 */
-	public void rightStop() {
-		status = "rightStop";
-		System.out.println(status);
-	}
-
-	public void toJump() {
-		if (!isJumping) {
-			this.isJumping = true;
-			//upTimes = upTimesMax;
-		}
+		// System.out.println(status);
 	}
 
 	/**
 	 * 跳跃
 	 */
 	public void jump() {
+		jumpedHeight += yspeed;
 		y -= yspeed;
+
 	}
 
 	/**
 	 * 下落
 	 */
 	public void down() {
+
 		y += yspeed;
 	}
 
 	/**
-	 * 死亡后执行的方法
+	 * 杀死敌人执行的方法
 	 */
-	public void afterDead() {
+	public void afterKillEnemy(DeadType type) {
+		switch (type) {
+		case PRESS:
+			isJumping = true;
+			isFalling = false;
+			jumpedHeight =50;
+			break;
+		default:
+			break;
+		}
+		score++;
+	}
 
+	/**
+	 * 修正场景
+	 */
+	private void fixScene() {
+		if (this.x - firstScene.getX() < GameConstant.SCENE_DEFAULT_WIDTH) {
+			nowScene = firstScene;
+		}
+		// 如果第一个场景已经移出画面
+		if (this.getFirstScene().getX() <= -GameConstant.SCENE_DEFAULT_WIDTH) {
+			gameController.nextScene();
+		}
+		// 如果mario已经走出了第一个场景
+		if (this.x - this.firstScene.getX() >= GameConstant.SCENE_DEFAULT_WIDTH) {
+			nowScene = secondScene;
+		}
+		// 如果尚未到达场景中间或者已经到达最后一个，则mario右移
+	}
+
+	/**
+	 * 判断是否吃到东西
+	 */
+	private synchronized void eatFood() {
+		for (GameObject obj : nowScene.getAllObjects()) {
+			boolean xCondition = (obj.getX() <= this.x && this.x - obj.getX() < obj.getWidth())
+					|| (obj.getX() > this.x && obj.getX() - this.x < this.width);
+			boolean yCondition = (obj.getY() < this.y && this.y - obj.getY() <= obj.getHeight())
+					|| (obj.getY() > this.y && obj.getY() - this.y <= this.getHeight());
+			if (xCondition && yCondition) {
+				nowScene.getAllObjects().remove(obj);
+				if (obj instanceof Coin) {
+					this.score++;
+				}
+				else
+					this.life++;
+				break;
+			}
+		}
+	}
+
+	@Override
+	protected synchronized boolean isDead() {
+		if (this.y >= nowScene.getHeight())
+			return true;
+		for (Enemy enemy : nowScene.getAllEnemies()) {
+			boolean xCondition = (enemy.getX() <= this.x && this.x - enemy.getX() < enemy.getWidth())
+					|| (enemy.getX() > this.x && enemy.getX() - this.x < this.width);
+			boolean yCondition = (enemy instanceof Flower)
+					? (enemy.getY() < this.y && this.y - enemy.getY() <= enemy.getHeight())
+							|| (enemy.getY() > this.y && enemy.getY() - this.y <= this.getHeight()-10)
+					: (enemy.getY() < this.y && this.y - enemy.getY() < enemy.getHeight());
+			if (xCondition && yCondition) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 死亡后处理方法
+	 */
+	@Override
+	protected synchronized void afterDead() {
+		if (life > 0) {
+			life--;
+			this.init();
+			nowScene.reset();
+		} else
+			isOver = true;
+
+	}
+
+	@Override
+	protected boolean isStriken() {
+		if (isJumping == false)
+			return false;
+		return super.isStriken();
 	}
 
 	/**
 	 * 根据状态显示图片，注意移动的时候图片要不断切换
 	 */
-	public void showImageWithStatus() {
-         if(status.equals("rightMove")){
-        	 posture = (++posture) % 5;
-         }
-         else if(status.equals("leftMove")){
-        	 posture = (++posture) % 5 + 5;
-         }
-         else if(status.equals("rightStop")){
-        	 posture = 0;
-         }
-         else if(status.equals("leftStop")){
-        	 posture = 5;
-         }
-         else if(status.equals("leftJump")){
-        	 posture = 9;
-         }
-         else if(status.equals("rightJump")){
-        	 posture = 4;
-         }
-     	showImage = images.get(posture);// 显示状态图
-	}
-
-	/**
-	 * 判断是否可以向左移动
-	 */
-	public boolean isCanLeft() {
-		//TODO
-		
-		return false;
-	}
-
-	/**
-	 * 判断是否可以向右移动移动
-	 */
-	public boolean isCanRight() {
-		//TODO
-		return false;
-	}
-
-	/**
-	 * 判断是否在障碍物上面
-	 */
-	public boolean isOnland() {
-		//TODO
-		return false;
+	private void showImageWithStatus() {
+		if (status.equals("rightMove")) {
+			posture = (++posture) % 5;
+		} else if (status.equals("leftMove")) {
+			posture = (++posture) % 5 + 5;
+		} else if (status.equals("rightStop")) {
+			posture = 0;
+		} else if (status.equals("leftStop")) {
+			posture = 5;
+		} else if (status.equals("leftJump")) {
+			posture = 9;
+		} else if (status.equals("rightJump")) {
+			posture = 4;
+		}
+		showImage = images.get(posture);// 显示状态图
 	}
 
 	@Override
 	public void run() {
-		while (true) {
-			try { 
-			/*	 1.根据状态改变显示的图片
-				 2.判断是否碰到障碍物
-				 3.判断是否在障碍物上面
-				 4.判断是否与敌人接触
-    		*/
-			    // 是否可以左向移动的标志
-				boolean isCanLeft = isCanLeft();
-				// 是否可以右向移动的标志
-				boolean isCanRight = isCanRight();
-				// 是否着陆的标志
-				boolean isOnland = isOnland();
-				methods.get(status).invoke(this);
-                showImageWithStatus();
+		try {
+			while (!isOver) {
 				Thread.sleep(GameConstant.SLEEPTIME);
-			} catch (IllegalAccessException e1) {
+				//判断是否暂停
+				if (isPause) {
+					continue;
+				}
+				// 判断是否死亡
+				if (isDead())
+					afterDead();
+				// 判断吃硬币
+				eatFood();
+				// 修改当前场景
+				fixScene();
+				// 修改mario和障碍物的距离
+				fixDistance();
+				// 根据状态显示图片
+				showImageWithStatus();
 
-				e1.printStackTrace();
-			} catch (IllegalArgumentException e1) {
+				// 是否可以左向移动的标志
+				boolean canLeft = isCanLeft();
+				// 是否可以右向移动的标志
+				boolean canRight = isCanRight();
+				// 是否着陆的标志
+				boolean onland = isOnland();
+				// 是否撞击到障碍物
+				boolean striken = isStriken();
+				if (canLeft && status.equals("leftMove") || canRight && status.equals("rightMove"))
+					methods.get(status).invoke(this);
+				// 处于上升状态时
+				if (isJumping) {
+					if (striken) {
+						isJumping = false;
+						isFalling = true;
 
-				e1.printStackTrace();
-			} catch (InvocationTargetException e1) {
-
-				e1.printStackTrace();
-			} catch (InterruptedException e) {
-				System.out.println("mario线程中断");
-				e.printStackTrace();
+					}
+					if (isSecondJumping) {
+						System.out.println("sj");
+					 this.maxJumpHeight=200;
+					 isSecondJumping=false;
+					}
+					// 如果还未跳跃到上升高度
+					if (!isFalling && jumpedHeight < maxJumpHeight)
+						jump();
+					else {
+						isJumping = false;
+						isFalling = true;
+					}
+				}
+				// 处于下落状态时
+				if ((!onland && !isJumping) || isFalling) {
+					isSecondJumping=false;
+					maxJumpHeight=120;
+					// 如果还未落到地上
+					if (!onland) {
+						isFalling = true;
+						down();
+					} else {
+						isFalling = false;
+						jumpedHeight = 0;
+					}
+				}
+			
 			}
+		} catch (IllegalAccessException e1) {
 
+			e1.printStackTrace();
+		} catch (InvocationTargetException e1) {
+
+			e1.printStackTrace();
+		} catch (InterruptedException e) {
+			System.out.println("mario线程中断");
+			e.printStackTrace();
 		}
+
 	}
 
 	public int getLife() {
@@ -246,7 +373,7 @@ public class Mario extends Role implements Runnable {
 	public void setLife(int life) {
 		this.life = life;
 	}
-    
+
 	public Scene getFirstScene() {
 		return firstScene;
 	}
@@ -271,4 +398,28 @@ public class Mario extends Role implements Runnable {
 		this.lastSceneSort = lastSceneSort;
 	}
 
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+	public boolean isJumping() {
+		return isJumping;
+	}
+
+	public void setJumping(boolean isJumping) {
+		this.isJumping = isJumping;
+	}
+
+	public boolean isFalling() {
+		return isFalling;
+	}
+
+	public void setFalling(boolean isFalling) {
+		this.isFalling = isFalling;
+	}
+	
 }

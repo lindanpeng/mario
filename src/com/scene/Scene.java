@@ -2,11 +2,17 @@ package com.scene;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import javax.swing.SpringLayout.Constraints;
+
 import com.constant.GameConstant;
-import com.obstruction.Obstruction;
+import com.gameobject.Coin;
+import com.gameobject.GameObject;
+import com.gameobject.Obstruction;
 import com.role.Enemy;
+import com.role.Mario;
 
 public class Scene {
 //场景x坐标
@@ -28,14 +34,19 @@ private List<Enemy> allEnemies;
 //当前在场景中的所有障碍物
 private List<Obstruction> allObstructions;
 //所有被消灭的敌人
-private List<Enemy> removedEnemies=new ArrayList<>();
+private List<Enemy> removedEnemies=Collections.synchronizedList(new ArrayList<Enemy>());
 //所有被消灭的障碍物
-private List<Obstruction> removedObstructions=new ArrayList<>();
-public Scene(BufferedImage background,List<Enemy> enemies,List<Obstruction> obstructions,int sort){
+private List<Obstruction> removedObstructions=Collections.synchronizedList(new ArrayList<Obstruction>());
+//所有在当前场景的硬币
+private List<GameObject> allObjects=Collections.synchronizedList(new ArrayList<GameObject>());
+//mario
+private Mario mario;
+public Scene(BufferedImage background,List<Enemy> enemies,List<Obstruction> obstructions,int sort,Mario mario){
+	allEnemies=Collections.synchronizedList(enemies);
+	allObstructions=Collections.synchronizedList(obstructions);
 	this.background=background;
-	this.allEnemies=enemies;
-	this.allObstructions=obstructions;
 	this.sort=sort;
+	this.mario=mario;
 }
 /**
  * 场景重置
@@ -43,9 +54,12 @@ public Scene(BufferedImage background,List<Enemy> enemies,List<Obstruction> obst
 public void reset(){
 	allEnemies.addAll(removedEnemies);
 	allObstructions.addAll(removedObstructions);
+	allObjects.clear();
 	removedEnemies.clear();
 	removedObstructions.clear();
 	for(Enemy enemy:allEnemies){
+		enemy.setNowScene(this);
+		enemy.setMario(mario);
 		enemy.init();
 	}
 	for(Obstruction obstruction:allObstructions){
@@ -62,6 +76,9 @@ public void leftMove(){
 	}
 	for(Obstruction obstruction:allObstructions){
 		obstruction.setX(obstruction.getX()-xspeed);
+	}
+	for(GameObject obj:allObjects){
+		obj.setX(obj.getX()-xspeed);
 	}
 }
 /**
@@ -105,10 +122,10 @@ public int getX() {
 }
 public void setX(int x) {
 	for(Enemy enemy:allEnemies){
-		enemy.setX(enemy.getX()+x);
+		enemy.setX(enemy.getStartX()+x);
 	}
 	for(Obstruction obstruction:allObstructions){
-		obstruction.setX(obstruction.getX()+x);
+		obstruction.setX(obstruction.getStartX()+x);
 	}
 	this.x = x;
 }
@@ -135,6 +152,18 @@ public int getSort() {
 }
 public void setSort(int sort) {
 	this.sort = sort;
+}
+
+public List<GameObject> getAllObjects() {
+	return allObjects;
+}
+public void setAllObjects(List<GameObject> allObjects) {
+	this.allObjects = allObjects;
+}
+public void pauseScene(boolean status) {
+	for(Enemy enemy:allEnemies){
+		enemy.setPause(status);
+	}
 }
 
 }

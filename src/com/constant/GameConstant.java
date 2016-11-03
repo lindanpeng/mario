@@ -5,4 +5,5 @@ public class GameConstant {
 	public static int SLEEPTIME = 50;
 	public static int SCENE_DEFAULT_WIDTH = 900;
 	public static int SCENE_DEFAULT_HEIGHT = 600;
+	public static int EAT_MUSHROOM_CHANGE=2;
 }
