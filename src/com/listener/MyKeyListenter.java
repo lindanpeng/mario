@@ -5,12 +5,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.text.AbstractDocument.LeafElement;
-
-import org.w3c.dom.ls.LSInput;
-
 import com.controller.GameController;
-import com.role.Mario;
 
 public class MyKeyListenter extends KeyAdapter {
    private GameController gameController;
@@ -28,7 +23,7 @@ public class MyKeyListenter extends KeyAdapter {
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == 37)
 			gameController.doAction(list.get(0));
-		if (e.getKeyCode() == 39)
+		else if (e.getKeyCode() == 39)
 			gameController.doAction(list.get(1));
 		
 	}
@@ -42,7 +37,7 @@ public class MyKeyListenter extends KeyAdapter {
 		if (e.getKeyCode() == 38)
 			gameController.doAction(list.get(2));
         if(e.getKeyCode()==16)
-        	gameController.pauseGame();
+        	gameController.pauseOrPlayGame();
         	
 	}
 

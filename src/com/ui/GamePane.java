@@ -11,6 +11,7 @@ import javax.swing.JPanel;
  *
  */
 
+import com.controller.GameController;
 import com.gameobject.Coin;
 import com.gameobject.GameObject;
 import com.gameobject.Obstruction;
@@ -30,12 +31,9 @@ public class GamePane extends JPanel {
 	private int width;
 	// 画面高度
 	private int height;
-	// 游戏暂停标志
-	private boolean isPause;
 	// 游戏开始时间
 	private long startTime;
-	private int drawTimes;
-
+    private int times;
 	public GamePane(int width, int height) {
 		this.width = width;
 		this.height = height;
@@ -47,15 +45,9 @@ public class GamePane extends JPanel {
 	 * 绘制画面
 	 */
 	@Override
-	public void paint(Graphics g) {
-		if (isPause) {
-			if (drawTimes < 10) {
-				g.drawImage(Img.pauseImage, 0, 0, width, height, null);
-				drawTimes++;
-			}
-			return;
-		}
+	public void paint(Graphics g) {           		
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		
 		Graphics bg = image.getGraphics();
 		// 设置文本字体
 		bg.setFont(new Font("微软雅黑", Font.BOLD, 20));
@@ -63,6 +55,9 @@ public class GamePane extends JPanel {
 		drawScene(firstScene, bg);
 		/* ================场景二===================== */
 		drawScene(secondScene, bg);
+		if(firstScene==secondScene)
+		//绘制大魔王
+		bg.drawImage(Img.monsterImage.get(times++%Img.MONSTER_IMAGES_NUM),600+300,300+0,600+0,300+176,0,0,300,176,null);
 		// 绘制超级玛丽
 		bg.drawImage(mario.getShowImage(), mario.getX(), mario.getY(), null);
 		// 绘制生命数
@@ -71,6 +66,10 @@ public class GamePane extends JPanel {
 		bg.drawString("分数：" + mario.getScore(), 150, 20);
 		// 绘制敌人
 		bg.drawString("已用时间：" + TimeUtil.getInterval(startTime), 250, 20);
+
+	
+		
+		
 		g.drawImage(image, 0, 0, null);
 	}
 
@@ -109,13 +108,6 @@ public class GamePane extends JPanel {
 
 	public void setStartTime(long startTime) {
 		this.startTime = startTime;
-	}
-
-	public void setPause(boolean isPause) {
-		if (!isPause) {
-			drawTimes = 0;
-		}
-		this.isPause = isPause;
 	}
 
 }

@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.SpringLayout.Constraints;
-
-import com.constant.GameConstant;
-import com.gameobject.Coin;
+import com.config.ScenesConfig;
 import com.gameobject.GameObject;
 import com.gameobject.Obstruction;
 import com.role.Enemy;
@@ -16,17 +13,17 @@ import com.role.Mario;
 
 public class Scene {
 //场景x坐标
-private int x=0;
+private int x;
 //场景y坐标
-private int y=0;
+private int y;
 //场景宽度
-private int width=GameConstant.SCENE_DEFAULT_WIDTH;
+private int width=ScenesConfig.SCENE_WIDTH;
 //场景高度
-private int height=GameConstant.SCENE_DEFAULT_HEIGHT;
+private int height=ScenesConfig.SCENE_HEIGHT;
 //场景顺序
 private int sort;
 //场景水平移动速度
-private int xspeed=10;
+private int xspeed=ScenesConfig.XSPEED;
 //背景图片
 private BufferedImage background;
 //当前在场景中的所有敌人
@@ -41,6 +38,12 @@ private List<Obstruction> removedObstructions=Collections.synchronizedList(new A
 private List<GameObject> allObjects=Collections.synchronizedList(new ArrayList<GameObject>());
 //mario
 private Mario mario;
+public Scene(BufferedImage background,List<Enemy> enemies,List<Obstruction> obstructions,int sort){
+	allEnemies=Collections.synchronizedList(enemies);
+	allObstructions=Collections.synchronizedList(obstructions);
+	this.background=background;
+	this.sort=sort;
+}
 public Scene(BufferedImage background,List<Enemy> enemies,List<Obstruction> obstructions,int sort,Mario mario){
 	allEnemies=Collections.synchronizedList(enemies);
 	allObstructions=Collections.synchronizedList(obstructions);
@@ -164,6 +167,12 @@ public void pauseScene(boolean status) {
 	for(Enemy enemy:allEnemies){
 		enemy.setPause(status);
 	}
+}
+public Mario getMario() {
+	return mario;
+}
+public void setMario(Mario mario) {
+	this.mario = mario;
 }
 
 }

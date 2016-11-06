@@ -3,10 +3,8 @@ package com.role;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import com.gameobject.Coin;
 import com.gameobject.Obstruction;
 import com.scene.Scene;
-import com.ui.Img;
 
 /**
  * 游戏角色类，mario、敌人都要继承该类
@@ -178,12 +176,20 @@ public abstract class Role implements Runnable {
 			boolean yCondition = (obstruction.getY() > this.y && obstruction.getY() - this.y < this.height);
 			boolean xCondition = (obstruction.getX() >= this.x && obstruction.getX() - this.x < this.getWidth())
 					|| (obstruction.getX() <= this.x && this.x - obstruction.getX() < obstruction.getWidth());
-			if ((obstruction.getX() > this.x && obstruction.getX() - this.x < this.width) && yCondition)
-				this.x = obstruction.getX() - this.width;
-			if (obstruction.getX() < this.x && this.x - obstruction.getX() < obstruction.getWidth() && yCondition)
-				this.x = obstruction.getX() + obstruction.getWidth();
 			if (xCondition && yCondition)
-				this.y = obstruction.getY() - this.height;
+				{
+				  this.y = obstruction.getY() - this.height;
+				  yCondition=false;
+				}
+			if ((obstruction.getX() > this.x && obstruction.getX() - this.x < this.width) && yCondition)
+				{
+				this.x = obstruction.getX() - this.width;
+				}
+			if (obstruction.getX() < this.x && this.x - obstruction.getX() < obstruction.getWidth() && yCondition)
+				{
+				this.x = obstruction.getX() + obstruction.getWidth();
+				}
+
 
 		}
 	}

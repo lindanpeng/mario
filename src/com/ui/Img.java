@@ -1,6 +1,5 @@
 package com.ui;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +37,8 @@ public class Img {
 	public static BufferedImage marioDeadImage = null;
 	//暂停时阴影图片
 	public static BufferedImage  pauseImage=null;
+	//怪物gif
+	public static List<BufferedImage> monsterImage=new ArrayList<>();
 	// 食人花gif
 	public static List<BufferedImage> allFlowerImage = new ArrayList<>();
 	// 蘑菇gif
@@ -46,8 +47,7 @@ public class Img {
 	public static List<BufferedImage> allTurtleImage = new ArrayList<>();
 	// 障碍物图片
 	public static List<BufferedImage> allObstructionImage = new ArrayList<>();
-
-
+	public static final int MONSTER_IMAGES_NUM=73;
 	public static final int STARTBTN_IMAGES_NUM=3;
 	public static final int ABOUNTBTN_IMAGES_NUM=3;
 	// mario图片数量
@@ -91,12 +91,16 @@ public class Img {
 			 */
 			for(int i=1;i<=OBSTRCTION_IMAGES_NUM;i++)
 				allObstructionImage.add(ImageIO.read(new File(IMAGE_PATH+"ob"+i+".gif")));
+			
+			for (int i = 1; i<=MONSTER_IMAGES_NUM; i++) {
+				monsterImage.add(ImageIO.read(new File(IMAGE_PATH+"monster ("+i+").png")));
+			}
 			/*
 			 * 其他图片
 			 */
 			startImage=ImageIO.read(new File(IMAGE_PATH+"start.jpg"));
 			bgImage=ImageIO.read(new File(IMAGE_PATH+"firststage.gif"));
-			endImage = ImageIO.read(new File(IMAGE_PATH + "firststageend.gif"));
+			endImage = ImageIO.read(new File(IMAGE_PATH + "endstage.gif"));
 			marioDeadImage=ImageIO.read(new File(IMAGE_PATH+"over.gif"));
 			coinImage=ImageIO.read(new File(IMAGE_PATH+"coin.png"));
 			mushroomImage=ImageIO.read(new File(IMAGE_PATH+"mushroom.png"));

@@ -5,6 +5,10 @@ import java.awt.image.BufferedImage;
 import com.ui.Img;
 
 public abstract class GameObject {
+	//起始x坐标
+	private int startX;
+	//起始y坐标
+	private int startY;
 	//x坐标
 	protected int x;
 	//y坐标
@@ -16,8 +20,12 @@ public abstract class GameObject {
 	//显示的图片
 	protected BufferedImage showImage;
 	public GameObject(int x,int y){
-		this.x=x;
-		this.y=y;
+	      this.startX=x;
+	      this.startY=y;
+	}
+	public void init(){
+		this.x=startX;
+		this.y=startY;
 	}
 	public int getX() {
 		return x;
@@ -49,5 +57,19 @@ public abstract class GameObject {
 	public void setHeight(int height) {
 		this.height = height;
 	}
+	public int getStartX() {
+		return startX;
+	}
 
+	public void setStartX(int startX) {
+		this.startX = startX;
+	}
+
+	public int getStartY() {
+		return startY;
+	}
+
+	public void setStartY(int startY) {
+		this.startY = startY;
+	}
 }

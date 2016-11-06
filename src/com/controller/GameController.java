@@ -2,21 +2,20 @@ package com.controller;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
 
-import com.constant.GameConstant;
-import com.gameobject.Obstruction;
+import com.config.MarioConfig;
+import com.config.MessageConfig;
+import com.config.ScenesConfig;
+import com.config.SystemConfig;
 import com.listener.KeyCodeAndType;
 import com.listener.MyKeyListenter;
-import com.role.Enemy;
-import com.role.Flower;
+import com.music.MusicPlayer;
 import com.role.Mario;
-import com.role.Triangle;
 import com.scene.Scene;
 import com.ui.GameFrame;
 import com.ui.GamePane;
@@ -29,6 +28,8 @@ import com.ui.Img;
  *
  */
 public class GameController {
+	// 游戏线程控制对象
+	public static final Object THREAD_OBJECT = new Object();
 	// 游戏窗口
 	private GameFrame gameFrame;
 	// 游戏运行面板
@@ -54,34 +55,28 @@ public class GameController {
 		this.gameFrame = gameFrame;
 		this.gamePane = gameFrame.getGamePane();
 		this.init();
-
 	}
-
 	/**
 	 * 初始化方法,载入资源以及数据,建立游戏人物场景
 	 */
 	public void init() {
 		// 获取mario数据并创建对象
-		mario = new Mario(0, 300, 0, this);
+		mario = new Mario(MarioConfig.X,MarioConfig.Y,MarioConfig.WIDTH,MarioConfig.HEIGHT,
+				          MarioConfig.LIFE,MarioConfig.XSPEED,MarioConfig.YSPEED,this);
 		// 获取游戏场景数据并创建对象
-		scenes = new ArrayList<>();
-		scenes.add(testScene1());
-		scenes.add(testScene2());
-		scenes.add(testScene3());
+		scenes =ScenesConfig.ALLSCENES;
+		scenes.get(scenes.size()-1).setBackground(Img.endImage);
+        for(Scene scene:scenes)
+        	scene.setMario(mario);
 		// 设置场景1
 		firstScene = scenes.get(0);
 		// 设置场景2
-		secondScene = scenes.get(1);
+		secondScene = (scenes.size()>1)?scenes.get(1):firstScene;
 		// 设置第二个场景的起始x坐标在画面之外
-		secondScene.setX(GameConstant.SCENE_DEFAULT_WIDTH);
-
-		myKeyListenter = new MyKeyListenter(this);
-		gamePane.setFirstScene(firstScene);
-		gamePane.setSecondScene(secondScene);
+		secondScene.setX(ScenesConfig.SCENE_WIDTH);
 		gamePane.setMario(mario);
-		mario.setFirstScene(firstScene);
-		mario.setSecondScene(secondScene);
-		mario.setNowScene(firstScene);
+		myKeyListenter = new MyKeyListenter(this);
+
 		mario.setLastSceneSort(scenes.size());
 		marioAction = new HashMap<KeyCodeAndType, Method>();
 		try {
@@ -89,7 +84,7 @@ public class GameController {
 			marioAction.put(new KeyCodeAndType(39, 0), mario.getClass().getMethod("toRightMove"));
 			marioAction.put(new KeyCodeAndType(37, 1), mario.getClass().getMethod("toLeftStop"));
 			marioAction.put(new KeyCodeAndType(39, 1), mario.getClass().getMethod("toRightStop"));
-			marioAction.put(new KeyCodeAndType(38,0),  mario.getClass().getMethod("toJump"));
+			marioAction.put(new KeyCodeAndType(38, 0), mario.getClass().getMethod("toJump"));
 
 		} catch (NoSuchMethodException | SecurityException e) {
 
@@ -101,165 +96,101 @@ public class GameController {
 	 * 开始游戏,启动各个线程
 	 */
 	public void startGame() {
-		isPause=false;
-		isWin=false;
-		gamePane.setPause(false);
+		isPause = false;
+		isWin = false;
 		gamePane.setStartTime(System.currentTimeMillis());
+		gamePane.setFirstScene(firstScene);
+		gamePane.setSecondScene(secondScene);
+		mario.setFirstScene(firstScene);
+		mario.setSecondScene(secondScene);
+		mario.setNowScene(firstScene);
 		// TODO 为了不消耗资源,改为每次启动两个场景的线程
 		for (Scene scene : scenes)
 			scene.reset();
 		// 初始化mario对象，启动线程
-		mario.init();
+		mario.restart();
 		// 启动画面绘制线程
 		new GameThread().start();
 		// 安装玩家游戏控制器
-		gamePane.addKeyListener(myKeyListenter);
-		gamePane.requestFocus();
+		gameFrame.addKeyListener(myKeyListenter);
+		gameFrame.requestFocus();
+		//播放背景音乐
+		MusicPlayer.playBackgroundMusic();
 	}
-  /**
-   * 暫停/开始游戲
-   */
-	public void pauseGame(){
-		boolean status=!isPause;
-		isPause=status;
-		mario.setPause(status);
-		for(Scene scene:scenes){
-			scene.pauseScene(status);
+
+	/**
+	 * 暫停/运行游戲
+	 */
+	public void pauseOrPlayGame() {
+		boolean status = !isPause;
+		synchronized (THREAD_OBJECT) {
+			isPause = status;
+			
+			mario.setPause(status);
+			for (Scene scene : scenes) {
+				scene.pauseScene(status);
+			}
+			gameFrame.showPausePane(status);
+			if (!status)
+				THREAD_OBJECT.notifyAll();
 		}
-		gamePane.setPause(status);
-	
-		
 	}
+
 	/**
 	 * 进入下一个场景
 	 */
 	public void nextScene() {
 		if (mario.getSecondScene().getSort() != mario.getLastSceneSort()) {
 			Scene scene = scenes.get(mario.getSecondScene().getSort());
-			scene.setX(GameConstant.SCENE_DEFAULT_WIDTH);
+			scene.setX(ScenesConfig.SCENE_WIDTH);
 			mario.setFirstScene(mario.getSecondScene());
 			mario.setSecondScene(scene);
 			gamePane.setFirstScene(mario.getFirstScene());
 			gamePane.setSecondScene(mario.getSecondScene());
 		} else {
 			mario.setFirstScene(mario.getSecondScene());
+			gamePane.setFirstScene(mario.getFirstScene());
+			gamePane.setSecondScene(mario.getSecondScene());
 		}
+	
 	}
+
 	/**
 	 * 执行mario的动作
 	 * @param keyCodeAndType
 	 */
-    public void doAction(KeyCodeAndType keyCodeAndType){
-    	try {
-			marioAction.get(keyCodeAndType).invoke(mario);			
+	public void doAction(KeyCodeAndType keyCodeAndType) {
+		try {
+			marioAction.get(keyCodeAndType).invoke(mario);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			System.err.println("反射执行动作出错！");
 			e.printStackTrace();
 		}
-    }
+	}
+
 	/**
 	 * 游戏结束后处理
+	 * @throws InterruptedException 
 	 */
-	public void afterOver() {
-		int i;
+	public void afterOver() throws InterruptedException {
+        MusicPlayer.stopBackgroundMusic();
+		int choice;
 		if (isWin) {
-			i = JOptionPane.showConfirmDialog(null, "恭喜你通过游戏的所有关卡，请问是否要退出游戏?", "提示", JOptionPane.YES_NO_OPTION);
-		} else {
-			i = JOptionPane.showConfirmDialog(null, "游戏结束，请问是否要退出游戏?", "提示", JOptionPane.YES_NO_OPTION);
-
-		}
-		if (i == 0)
-			gameFrame.dispose();
+			 MusicPlayer.playWinMusic();
+			 choice = JOptionPane.showConfirmDialog(null,MessageConfig.WIN_MESSAGE, "提示", JOptionPane.YES_NO_OPTION);
+		} 
 		else {
-			mario.setStart(false);
-			mario.setScore(0);
-			gamePane.removeKeyListener(myKeyListenter);
+        	MusicPlayer.playGameOverMusic();
+        	choice= JOptionPane.showConfirmDialog(null,MessageConfig.GAMEOVER_MESSAGE, "提示", JOptionPane.YES_NO_OPTION);
+		}
+		if (choice == 0)
+			System.exit(0);
+		else {
+			gameFrame.removeKeyListener(myKeyListenter);
 			gameFrame.reset();
 		}
 
 	}
-
-	/**
-	 * TODELETE 测试场景1
-	 */
-	private Scene testScene1() {
-		List<Enemy> enemies = new ArrayList<>();
-		/*
-		 * 添加地面
-		 */
-		List<Obstruction> obstructions = new ArrayList<>();
-		for (int i = 0; i < 15; i++)
-			obstructions.add(new Obstruction(i * 60, 540, 1));
-
-		//enemies.add(new Turtle(180, 480));
-		 enemies.add(new Triangle(360, 480));
-		enemies.add(new Flower(690, 480));
-
-		/*
-		 * 添加墙块
-		 */
-		obstructions.add(new Obstruction(120, 360, 6));
-		obstructions.add(new Obstruction(300, 360, 7));
-		obstructions.add(new Obstruction(360, 360, 6));
-		obstructions.add(new Obstruction(420, 360, 7));
-		obstructions.add(new Obstruction(480, 360, 6));
-		obstructions.add(new Obstruction(540, 360, 7));
-		obstructions.add(new Obstruction(600, 360, 6));
-		obstructions.add(new Obstruction(660, 360, 7));
-		/*
-		 * 添加水管
-		 */
-		obstructions.add(new Obstruction(660, 480, 2));
-		obstructions.add(new Obstruction(720, 480, 3));
-		obstructions.add(new Obstruction(660, 540, 4));
-		obstructions.add(new Obstruction(720, 540, 5));
-		Scene scene = new Scene(Img.bgImage, enemies, obstructions, 1, mario);
-		return scene;
-	}
-
-	/**
-	 * TODELETE 测试场景2
-	 */
-	private Scene testScene2() {
-		List<Enemy> enemies = new ArrayList<>();
-		List<Obstruction> obstructions = new ArrayList<>();
-		obstructions.add(new Obstruction(780, 420, 2));
-		obstructions.add(new Obstruction(840, 420, 3));
-		obstructions.add(new Obstruction(780, 480, 4));
-		obstructions.add(new Obstruction(780, 540, 4));
-		obstructions.add(new Obstruction(840, 480, 5));
-		obstructions.add(new Obstruction(840, 540, 5));
-
-		obstructions.add(new Obstruction(0, 540, 1));
-		obstructions.add(new Obstruction(60, 540, 1));
-		obstructions.add(new Obstruction(120, 540, 1));
-		obstructions.add(new Obstruction(420, 540, 1));
-		obstructions.add(new Obstruction(540, 540, 1));
-		obstructions.add(new Obstruction(660, 540, 1));
-
-		obstructions.add(new Obstruction(60, 240, 6));
-		obstructions.add(new Obstruction(180, 360, 7));
-		obstructions.add(new Obstruction(180, 120, 7));
-		obstructions.add(new Obstruction(240, 120, 7));
-		Scene scene = new Scene(Img.bgImage, enemies, obstructions, 2, mario);
-		return scene;
-	}
-
-	/**
-	 * TODELETE 测试场景3
-	 */
-	private Scene testScene3() {
-		List<Enemy> enemies = new ArrayList<>();
-		/*
-		 * 添加地面
-		 */
-		List<Obstruction> obstructions = new ArrayList<>();
-		for (int i = 0; i < 15; i++)
-			obstructions.add(new Obstruction(i * 60, 540, 1));
-		Scene scene = new Scene(Img.bgImage, enemies, obstructions, 3, mario);
-		return scene;
-	}
-	
 	/**
 	 * 画面绘制线程
 	 *
@@ -267,20 +198,31 @@ public class GameController {
 	class GameThread extends Thread {
 
 		public void run() {
-			// 当游戏不处于暂停或结束情况下则不断循环
-			while (!mario.isOver() && !isWin) {
-				try {
-					Thread.sleep(GameConstant.SLEEPTIME);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			try {
+				// 当游戏不处于暂停或结束情况下则不断循环
+				while (!mario.isOver() && !isWin) {
+					Thread.sleep(SystemConfig.SLEEP_TIME);
+					gamePane.repaint();
+					if (isPause) {
+						synchronized (GameController.THREAD_OBJECT) {
+							GameController.THREAD_OBJECT.wait();
+						}
+					}
+					if (mario.getX()>SystemConfig.AUTO_MOVE_X) {
+						gameFrame.removeKeyListener(myKeyListenter);
+					}
+					if (mario.getX() >=SystemConfig.ENDX) {
+						{
+							isWin = true;
+							mario.setOver(true);					
+						}
+					}
+
 				}
-				gamePane.repaint();
-				if (mario.getX() >= GameConstant.SCENE_DEFAULT_WIDTH - mario.getWidth()) {
-					isWin = true;
-				}
-			
+				afterOver();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			afterOver();
 
 		}
 	}

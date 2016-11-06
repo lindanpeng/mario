@@ -4,11 +4,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.config.ScenesConfig;
+import com.config.SystemConfig;
 import com.constant.DeadType;
-import com.constant.GameConstant;
 import com.controller.GameController;
 import com.gameobject.Coin;
 import com.gameobject.GameObject;
+import com.gameobject.Obstruction;
+import com.music.MusicPlayer;
 import com.scene.Scene;
 import com.ui.Img;
 
@@ -18,8 +22,10 @@ import com.ui.Img;
  * @author 贵安
  */
 public class Mario extends Role implements Runnable {
-	// 生命数
+	// 当前生命数
 	private int life;
+	//初始生命数
+	private int initLife;
 	// 当前的状态(左站立、右站立、左移动、右移动、左跳跃、右跳跃)
 	private String status;
 	// 所处场景1
@@ -47,11 +53,12 @@ public class Mario extends Role implements Runnable {
 	// 游戏控制器
 	private GameController gameController;
 
-	public Mario(int x, int y, int life, GameController gameController) {
-		super(x, y, 44, 50, 10,20);
-		this.gameController = gameController;
-		this.life = life;
+	public Mario(int x, int y,int width,int height,int life,int xspeed,int yspeed,GameController gameController) {
+		super(x, y, width,height, xspeed,yspeed);
 		images = Img.allMarioImage;
+		this.gameController = gameController;
+		this.initLife = life;
+
 		methods = new HashMap<String, Method>();
 		try {
 			methods.put("leftMove", this.getClass().getMethod("leftMove"));
@@ -64,14 +71,14 @@ public class Mario extends Role implements Runnable {
 	}
 
 	/**
-	 * 初始化数据
+	 * 复活时初始化数据
 	 */
 	public void init() {
 		status = "rightStop";
 		firstScene.reset();
 		secondScene.reset();
 		firstScene.setX(0);
-		secondScene.setX(GameConstant.SCENE_DEFAULT_WIDTH);
+		secondScene.setX(ScenesConfig.SCENE_WIDTH);
 		nowScene = firstScene;
 		isSecondJumping=false;
 		isJumping=false;
@@ -79,13 +86,20 @@ public class Mario extends Role implements Runnable {
 		maxJumpHeight=120;
 		super.init();
 	}
-
+	/**
+	 * 重新开始游戏时初始化数据
+	 */
+   public void restart(){
+	 life=initLife;
+	 score=0;
+	 isStart=false;
+	 init();
+   }
 	/**
 	 * 设置为左移动状态
 	 */
 	public void toLeftMove() {
 		status = "leftMove";
-		// System.out.println(status);
 	}
 
 	/**
@@ -93,7 +107,6 @@ public class Mario extends Role implements Runnable {
 	 */
 	public void toRightMove() {
 		status = "rightMove";
-		// System.out.println(status);
 	}
 
 	/**
@@ -101,7 +114,6 @@ public class Mario extends Role implements Runnable {
 	 */
 	public void toLeftStop() {
 		status = "leftStop";
-		// System.out.println(status);
 	}
 
 	/**
@@ -109,17 +121,15 @@ public class Mario extends Role implements Runnable {
 	 */
 	public void toRightStop() {
 		status = "rightStop";
-		// System.out.println(status);
 	}
 
 	/**
 	 * 设置为跳跃状态
 	 */
 	public void toJump() {
-		System.out.println(isJumping);
 		if (!isJumping) {
 			this.isJumping = true;
-	
+	        MusicPlayer.playJumpMusic();
 		}
 		else if(isJumping&&!isSecondJumping)
 			{
@@ -142,7 +152,7 @@ public class Mario extends Role implements Runnable {
 	 * 向右移动
 	 */
 	public void rightMove() {
-		if(this.x>=GameConstant.SCENE_DEFAULT_WIDTH-this.width)
+		if(this.x>=ScenesConfig.SCENE_WIDTH)
 			return;
 		if (this.x <= firstScene.getWidth() / 2 || firstScene == secondScene)
 			x += xspeed;
@@ -152,8 +162,6 @@ public class Mario extends Role implements Runnable {
 			firstScene.leftMove();
 			secondScene.leftMove();
 		}
-
-		// System.out.println(status);
 	}
 
 	/**
@@ -170,7 +178,7 @@ public class Mario extends Role implements Runnable {
 	 */
 	public void down() {
 
-		y += yspeed;
+		y += (yspeed+5);
 	}
 
 	/**
@@ -181,6 +189,7 @@ public class Mario extends Role implements Runnable {
 		case PRESS:
 			isJumping = true;
 			isFalling = false;
+			MusicPlayer.playkillEnemyMusic();
 			jumpedHeight =50;
 			break;
 		default:
@@ -193,15 +202,15 @@ public class Mario extends Role implements Runnable {
 	 * 修正场景
 	 */
 	private void fixScene() {
-		if (this.x - firstScene.getX() < GameConstant.SCENE_DEFAULT_WIDTH) {
+		if (this.x - firstScene.getX() <ScenesConfig.SCENE_WIDTH) {
 			nowScene = firstScene;
 		}
 		// 如果第一个场景已经移出画面
-		if (this.getFirstScene().getX() <= -GameConstant.SCENE_DEFAULT_WIDTH) {
+		if (this.getFirstScene().getX() <= -ScenesConfig.SCENE_WIDTH) {
 			gameController.nextScene();
 		}
 		// 如果mario已经走出了第一个场景
-		if (this.x - this.firstScene.getX() >= GameConstant.SCENE_DEFAULT_WIDTH) {
+		if (this.x - this.firstScene.getX() >= ScenesConfig.SCENE_WIDTH) {
 			nowScene = secondScene;
 		}
 		// 如果尚未到达场景中间或者已经到达最后一个，则mario右移
@@ -211,19 +220,23 @@ public class Mario extends Role implements Runnable {
 	 * 判断是否吃到东西
 	 */
 	private synchronized void eatFood() {
-		for (GameObject obj : nowScene.getAllObjects()) {
+		for (int i=0;i<nowScene.getAllObjects().size();i++) {
+			GameObject obj=nowScene.getAllObjects().get(i);
 			boolean xCondition = (obj.getX() <= this.x && this.x - obj.getX() < obj.getWidth())
 					|| (obj.getX() > this.x && obj.getX() - this.x < this.width);
 			boolean yCondition = (obj.getY() < this.y && this.y - obj.getY() <= obj.getHeight())
 					|| (obj.getY() > this.y && obj.getY() - this.y <= this.getHeight());
 			if (xCondition && yCondition) {
-				nowScene.getAllObjects().remove(obj);
+				{
+					nowScene.getAllObjects().remove(obj);
+					i--;
+				}
 				if (obj instanceof Coin) {
 					this.score++;
 				}
 				else
 					this.life++;
-				break;
+				MusicPlayer.playEatFoodMusic();
 			}
 		}
 	}
@@ -255,8 +268,13 @@ public class Mario extends Role implements Runnable {
 			life--;
 			this.init();
 			nowScene.reset();
-		} else
-			isOver = true;
+            MusicPlayer.playDeadMusic();
+		} 
+		else
+			{
+			 isOver = true;
+		
+			}
 
 	}
 
@@ -266,7 +284,19 @@ public class Mario extends Role implements Runnable {
 			return false;
 		return super.isStriken();
 	}
+    @Override
+    protected synchronized boolean isOnland() {
+    	// 判断是否在地面
+		for (Obstruction obstruction : nowScene.getAllObstructions()) {
+			boolean xCondition = (obstruction.getX() >= this.x && obstruction.getX() - this.x < this.getWidth())
+					|| (obstruction.getX() <= this.x && this.x - obstruction.getX() < obstruction.getWidth());
 
+			if ((obstruction.getY() > this.y && obstruction.getY() - this.y <= this.height) && xCondition) {
+				return true;
+			}
+		}
+		return false;
+    }
 	/**
 	 * 根据状态显示图片，注意移动的时候图片要不断切换
 	 */
@@ -291,11 +321,13 @@ public class Mario extends Role implements Runnable {
 	public void run() {
 		try {
 			while (!isOver) {
-				Thread.sleep(GameConstant.SLEEPTIME);
+				Thread.sleep(SystemConfig.SLEEP_TIME);
 				//判断是否暂停
 				if (isPause) {
 					continue;
 				}
+				if(x>SystemConfig.AUTO_MOVE_X)
+			     status="rightMove";
 				// 判断是否死亡
 				if (isDead())
 					afterDead();
@@ -326,7 +358,6 @@ public class Mario extends Role implements Runnable {
 
 					}
 					if (isSecondJumping) {
-						System.out.println("sj");
 					 this.maxJumpHeight=200;
 					 isSecondJumping=false;
 					}
@@ -421,5 +452,4 @@ public class Mario extends Role implements Runnable {
 	public void setFalling(boolean isFalling) {
 		this.isFalling = isFalling;
 	}
-	
 }

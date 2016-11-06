@@ -1,6 +1,7 @@
 package com.role;
 
-import com.constant.GameConstant;
+import com.config.SystemConfig;
+import com.controller.GameController;
 import com.ui.Img;
 
 /**
@@ -33,10 +34,13 @@ public class Flower extends Enemy {
 		try {
 			while (!isOver) {
 
-				Thread.sleep(GameConstant.SLEEPTIME);
-
+				Thread.sleep(SystemConfig.SLEEP_TIME);
 				if (isPause)
-					continue;
+				{
+					synchronized (GameController.THREAD_OBJECT) {
+					GameController.THREAD_OBJECT.wait();
+					}
+				}
 				if (startY == this.y)
 					Thread.sleep(1000);
 				boolean canUp = startY - this.y <= this.height;
