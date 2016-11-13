@@ -1,11 +1,9 @@
-package com.listener;
+package com.controller;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.controller.GameController;
 
 public class MyKeyListenter extends KeyAdapter {
    private GameController gameController;

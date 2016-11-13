@@ -1,8 +1,8 @@
-package com.role;
+package com.gameObject.creature;
 
 import com.config.SystemConfig;
 import com.controller.GameController;
-import com.ui.Img;
+import com.resource.Img;
 
 /**
  * 食人花敌人
@@ -19,7 +19,7 @@ public class Flower extends Enemy {
 		images = Img.allFlowerImage;
 	}
 
-	public void showImageWithStatus() {
+	protected void showImageWithStatus() {
 		posture = (++posture) % 6;
 		showImage = images.get(posture < 3 ? 0 : 1);
 	}

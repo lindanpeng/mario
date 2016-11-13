@@ -1,21 +1,28 @@
-package com.gameobject;
+package com.gameObject.lifelessObject;
 
-import com.music.MusicPlayer;
+import com.gameObject.GameObject;
+import com.resource.Img;
+import com.resource.MusicPlayer;
 import com.scene.Scene;
-import com.ui.Img;
 /**
  * 障碍物
  * @author 林丹
  *
  */
 public class Obstruction extends GameObject {
+	//判断是否可以被撞
+	private boolean canStriken;
+	//初始类型
 	private int originalType;
 	//障碍物类型
 	private int type;
 	public Obstruction(int x, int y,int type) {
 	  super(x, y);
       this.originalType=type;
-      
+      if(type==9)
+    	  canStriken=false;
+      else 
+    	   canStriken=true;
 	}
 	/**
 	 * 初始化各种数据
@@ -35,6 +42,13 @@ public class Obstruction extends GameObject {
 	public void setType(int type) {
 		this.type = type;
 		showImage=Img.allObstructionImage.get(type);
+	}
+	
+	public boolean isCanStriken() {
+		return canStriken;
+	}
+	public void setCanStriken(boolean canStriken) {
+		this.canStriken = canStriken;
 	}
 	public void beStriken(Scene nowScene) {
 		// 如果撞到普通墙块，则移除

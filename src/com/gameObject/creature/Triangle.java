@@ -1,9 +1,9 @@
-package com.role;
+package com.gameObject.creature;
 
 import com.config.SystemConfig;
 import com.constant.DeadType;
 import com.controller.GameController;
-import com.ui.Img;
+import com.resource.Img;
 
 /**
  * 蘑菇敌人
@@ -27,20 +27,19 @@ public class Triangle extends Enemy {
 		super.init();
 		isRightMoving = false;
 		posture = 0;
-		this.yspeed = 10;
 	}
 
 	/**
 	 * 根据状态显示图片，注意移动的时候图片要不断切换
 	 */
-	private void showImageWithStatus() {
+	protected void showImageWithStatus() {
 		posture = (++posture) % 6;
 		showImage = images.get(posture < 3 ? 0 : 1);
 	}
 
 	@Override
 	protected synchronized boolean isDead() {
-		if (mario.isFalling() && ((this.y > mario.y && this.y - mario.getY() <= this.height)
+		if (mario.isFalling() && ((this.y > mario.getY() && this.y - mario.getY() <= this.height)
 				&& ((this.x >= mario.getX() && this.x - mario.getX() < this.width)
 						|| (this.x < mario.getX() && mario.getX() - this.x <= mario.getWidth())))) {
 			mario.afterKillEnemy(DeadType.PRESS);
@@ -98,9 +97,9 @@ public class Triangle extends Enemy {
 					continue;
 				}
 				// 是否可以左向移动的标志
-				boolean canLeft = isCanLeft() && this.x >= nowScene.getX();
+				boolean canLeft = isCanLeft() && this.x >= nowScene.getX()&&hasObUnderLeft();
 				// 是否可以右向移动的标志
-				boolean canRight = isCanRight() && this.x < nowScene.getX() + nowScene.getWidth() - this.width;
+				boolean canRight = isCanRight() && this.x < nowScene.getX() + nowScene.getWidth() - this.width&&hasObUnderRight();
 
 				if (canRight && isRightMoving)
 					rightMove();

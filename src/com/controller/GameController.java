@@ -12,14 +12,13 @@ import com.config.MarioConfig;
 import com.config.MessageConfig;
 import com.config.ScenesConfig;
 import com.config.SystemConfig;
-import com.listener.KeyCodeAndType;
-import com.listener.MyKeyListenter;
-import com.music.MusicPlayer;
-import com.role.Mario;
+import com.gameObject.creature.Mario;
+import com.gameObject.lifelessObject.Obstruction;
+import com.resource.Img;
+import com.resource.MusicPlayer;
 import com.scene.Scene;
 import com.ui.GameFrame;
 import com.ui.GamePane;
-import com.ui.Img;
 
 /**
  * 游戏控制器
@@ -61,7 +60,7 @@ public class GameController {
 	 */
 	public void init() {
 		// 获取mario数据并创建对象
-		mario = new Mario(MarioConfig.X,MarioConfig.Y,MarioConfig.WIDTH,MarioConfig.HEIGHT,
+		mario = new Mario(MarioConfig.X,MarioConfig.Y,MarioConfig.DEFAULT_WIDTH,MarioConfig.DEFAULT_HEIGHT,
 				          MarioConfig.LIFE,MarioConfig.XSPEED,MarioConfig.YSPEED,this);
 		// 获取游戏场景数据并创建对象
 		scenes =ScenesConfig.ALLSCENES;
@@ -71,9 +70,17 @@ public class GameController {
 		// 设置场景1
 		firstScene = scenes.get(0);
 		// 设置场景2
-		secondScene = (scenes.size()>1)?scenes.get(1):firstScene;
+		if(scenes.size()>1)
+			{
+			 secondScene=scenes.get(1);
+			 secondScene.setX(ScenesConfig.SCENE_WIDTH);
+			}
+		else			
+		  {
+			secondScene=firstScene;
+		  }
 		// 设置第二个场景的起始x坐标在画面之外
-		secondScene.setX(ScenesConfig.SCENE_WIDTH);
+		
 		gamePane.setMario(mario);
 		myKeyListenter = new MyKeyListenter(this);
 
@@ -105,8 +112,8 @@ public class GameController {
 		mario.setSecondScene(secondScene);
 		mario.setNowScene(firstScene);
 		// TODO 为了不消耗资源,改为每次启动两个场景的线程
-		for (Scene scene : scenes)
-			scene.reset();
+        firstScene.reset();
+        secondScene.reset();
 		// 初始化mario对象，启动线程
 		mario.restart();
 		// 启动画面绘制线程
@@ -142,6 +149,7 @@ public class GameController {
 	public void nextScene() {
 		if (mario.getSecondScene().getSort() != mario.getLastSceneSort()) {
 			Scene scene = scenes.get(mario.getSecondScene().getSort());
+		    scene.reset();
 			scene.setX(ScenesConfig.SCENE_WIDTH);
 			mario.setFirstScene(mario.getSecondScene());
 			mario.setSecondScene(scene);
@@ -208,9 +216,9 @@ public class GameController {
 							GameController.THREAD_OBJECT.wait();
 						}
 					}
-					if (mario.getX()>SystemConfig.AUTO_MOVE_X) {
+/*					if (mario.getX()>SystemConfig.AUTO_MOVE_X) {
 						gameFrame.removeKeyListener(myKeyListenter);
-					}
+					}*/
 					if (mario.getX() >=SystemConfig.ENDX) {
 						{
 							isWin = true;

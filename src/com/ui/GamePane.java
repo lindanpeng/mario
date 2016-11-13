@@ -11,16 +11,16 @@ import javax.swing.JPanel;
  *
  */
 
-import com.controller.GameController;
-import com.gameobject.Coin;
-import com.gameobject.GameObject;
-import com.gameobject.Obstruction;
-import com.role.Enemy;
-import com.role.Mario;
+import com.gameObject.GameObject;
+import com.gameObject.creature.Enemy;
+import com.gameObject.creature.Mario;
+import com.gameObject.lifelessObject.Obstruction;
+import com.resource.Img;
 import com.scene.Scene;
 import com.util.TimeUtil;
 
 public class GamePane extends JPanel {
+	private static final long serialVersionUID = 1L;
 	// 游戏场景1
 	private Scene firstScene;
 	// 游戏场景2
@@ -57,9 +57,10 @@ public class GamePane extends JPanel {
 		drawScene(secondScene, bg);
 		if(firstScene==secondScene)
 		//绘制大魔王
-		bg.drawImage(Img.monsterImage.get(times++%Img.MONSTER_IMAGES_NUM),600+300,300+0,600+0,300+176,0,0,300,176,null);
+		bg.drawImage(Img.monsterImage.get(times++%Img.MONSTER_IMAGES_NUM),500+300,150+0,500+0,150+396,0,0,300,396,null);
 		// 绘制超级玛丽
-		bg.drawImage(mario.getShowImage(), mario.getX(), mario.getY(), null);
+		bg.drawImage(mario.getShowImage(), mario.getX(), mario.getY(),mario.getX()+mario.getWidth(),mario.getY()+mario.getHeight(),
+				     0,0,mario.getShowImage().getWidth(),mario.getShowImage().getHeight(), null);
 		// 绘制生命数
 		bg.drawString("生命数：" + mario.getLife(), 10, 20);
 		// 绘制分数
@@ -74,19 +75,27 @@ public class GamePane extends JPanel {
 	}
 
 	private void drawScene(Scene scene, Graphics bg) {
+
 		// 绘制背景
 		bg.drawImage(scene.getBackground(), scene.getX(), scene.getY(), null);
-		// 绘制敌人
+		
+		synchronized (scene.getAllEnemies()) {
+			// 绘制敌人
 		for (Enemy enemy : scene.getAllEnemies()) {
 			bg.drawImage(enemy.getShowImage(), enemy.getX(), enemy.getY(), null);
 		}
+		}
+		synchronized (scene.getAllObstructions()) {
 		// 绘制障碍物
 		for (Obstruction obstruction : scene.getAllObstructions()) {
 			bg.drawImage(obstruction.getShowImage(), obstruction.getX(), obstruction.getY(), null);
 		}
+		}
+		synchronized (scene.getAllObjects()){
 		// 绘制金币和蘑菇
 		for (GameObject obj : scene.getAllObjects()) {
 			bg.drawImage(obj.getShowImage(), obj.getX(), obj.getY(), null);
+		}
 		}
 	}
 

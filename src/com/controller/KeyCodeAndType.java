@@ -1,4 +1,4 @@
-package com.listener;
+package com.controller;
 
 public class KeyCodeAndType {
 //键盘对应码

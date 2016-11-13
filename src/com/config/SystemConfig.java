@@ -8,6 +8,7 @@ import org.dom4j.io.SAXReader;
 
 public class SystemConfig {
 public static Document DOCUMENT;
+public static final Element ROOT_ELEMENT;
 public static final int WINDOW_WIDTH;
 public static final int WINDOW_HEIGHT;
 public static final int SLEEP_TIME;
@@ -22,13 +23,13 @@ static{
 		
 		e.printStackTrace();
 	}
-	Element game= DOCUMENT.getRootElement();
-	WINDOW_WIDTH=Integer.valueOf(game.attributeValue("windowWidth"));
-	WINDOW_HEIGHT=Integer.valueOf(game.attributeValue("windowHeight"));
-	SLEEP_TIME=Integer.valueOf(game.attributeValue("sleepTime"));
-	TITLE=game.attributeValue("title");
-	AUTO_MOVE_X=Integer.valueOf(game.attributeValue("autoMoveX"));
-	ENDX=Integer.valueOf(game.attributeValue("endX"));
+	ROOT_ELEMENT= DOCUMENT.getRootElement();
+	WINDOW_WIDTH=Integer.valueOf(ROOT_ELEMENT.attributeValue("windowWidth"));
+	WINDOW_HEIGHT=Integer.valueOf(ROOT_ELEMENT.attributeValue("windowHeight"));
+	SLEEP_TIME=Integer.valueOf(ROOT_ELEMENT.attributeValue("sleepTime"));
+	TITLE=ROOT_ELEMENT.attributeValue("title");
+	AUTO_MOVE_X=Integer.valueOf(ROOT_ELEMENT.attributeValue("autoMoveX"));
+	ENDX=Integer.valueOf(ROOT_ELEMENT.attributeValue("endX"));
 }
 
 }

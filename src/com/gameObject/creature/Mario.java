@@ -1,25 +1,26 @@
-package com.role;
+package com.gameObject.creature;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.config.MarioConfig;
 import com.config.ScenesConfig;
 import com.config.SystemConfig;
 import com.constant.DeadType;
 import com.controller.GameController;
-import com.gameobject.Coin;
-import com.gameobject.GameObject;
-import com.gameobject.Obstruction;
-import com.music.MusicPlayer;
+import com.gameObject.GameObject;
+import com.gameObject.lifelessObject.Coin;
+import com.gameObject.lifelessObject.Obstruction;
+import com.resource.Img;
+import com.resource.MusicPlayer;
 import com.scene.Scene;
-import com.ui.Img;
 
 /**
  * 超级玛丽类
  * 
- * @author 贵安
+ * @author 林灿坚
  */
 public class Mario extends Role implements Runnable {
 	// 当前生命数
@@ -46,6 +47,8 @@ public class Mario extends Role implements Runnable {
 	private int jumpedHeight;
 	// 跳跃最大高度
 	private int maxJumpHeight;
+	//距离限制,当mario有30个像素在障碍物上才算站在障碍物上
+	private int limitDistance=10;
 	// 分数
 	private int score;
 	// 辅助显示图片
@@ -58,7 +61,6 @@ public class Mario extends Role implements Runnable {
 		images = Img.allMarioImage;
 		this.gameController = gameController;
 		this.initLife = life;
-
 		methods = new HashMap<String, Method>();
 		try {
 			methods.put("leftMove", this.getClass().getMethod("leftMove"));
@@ -78,6 +80,9 @@ public class Mario extends Role implements Runnable {
 		firstScene.reset();
 		secondScene.reset();
 		firstScene.setX(0);
+		width=MarioConfig.DEFAULT_WIDTH;
+		height=MarioConfig.DEFAULT_HEIGHT;
+		if(firstScene!=secondScene)
 		secondScene.setX(ScenesConfig.SCENE_WIDTH);
 		nowScene = firstScene;
 		isSecondJumping=false;
@@ -219,7 +224,8 @@ public class Mario extends Role implements Runnable {
 	/**
 	 * 判断是否吃到东西
 	 */
-	private synchronized void eatFood() {
+	private  void eatFood() {
+		synchronized (nowScene.getAllObjects()) {
 		for (int i=0;i<nowScene.getAllObjects().size();i++) {
 			GameObject obj=nowScene.getAllObjects().get(i);
 			boolean xCondition = (obj.getX() <= this.x && this.x - obj.getX() < obj.getWidth())
@@ -235,26 +241,53 @@ public class Mario extends Role implements Runnable {
 					this.score++;
 				}
 				else
-					this.life++;
+					{
+					 this.width=MarioConfig.BIG_WIDTH;
+					  this.height=MarioConfig.BIG_HEIGHT;
+					  this.life++;
+					}
 				MusicPlayer.playEatFoodMusic();
 			}
 		}
+		}
 	}
+    @Override
+    protected void fixDistance() {
+    	synchronized (nowScene.getAllObstructions()) {
 
+			for (Obstruction obstruction : nowScene.getAllObstructions()) {
+				boolean yCondition = (obstruction.getY() >= this.y && obstruction.getY() - this.y < this.height)||(this.y>obstruction.getY() &&this.y-obstruction.getY()<obstruction.getHeight());
+				boolean xCondition = (obstruction.getX() >= this.x && obstruction.getX() - this.x < this.width)|| (obstruction.getX()<= this.x && this.x - obstruction.getX() < obstruction.getWidth());
+				//当与障碍物重叠时
+				if (xCondition && yCondition) {
+			     if(isFalling&&((this.x>=obstruction.getX()&&this.width-(this.x-obstruction.getX())>limitDistance)||(obstruction.getX()>this.x&&this.x+this.width-obstruction.getX()>limitDistance)))
+			    	 this.y = obstruction.getY() - this.height;
+			     else if(status.equals("rightMove")&&obstruction.getX()>this.x)
+			    	 this.x = obstruction.getX() - this.width;
+			     else if(status.equals("leftMove")&&obstruction.getX()<this.x)
+			    		this.x = obstruction.getX() + obstruction.getWidth();
+				}
+			}
+
+		}
+    }
 	@Override
-	protected synchronized boolean isDead() {
+	protected  boolean isDead() {
 		if (this.y >= nowScene.getHeight())
 			return true;
+		synchronized (nowScene.getAllEnemies()) {
 		for (Enemy enemy : nowScene.getAllEnemies()) {
 			boolean xCondition = (enemy.getX() <= this.x && this.x - enemy.getX() < enemy.getWidth())
 					|| (enemy.getX() > this.x && enemy.getX() - this.x < this.width);
 			boolean yCondition = (enemy instanceof Flower)
 					? (enemy.getY() < this.y && this.y - enemy.getY() <= enemy.getHeight())
-							|| (enemy.getY() > this.y && enemy.getY() - this.y <= this.getHeight()-10)
-					: (enemy.getY() < this.y && this.y - enemy.getY() < enemy.getHeight());
+					|| (enemy.getY() > this.y && enemy.getY() - this.y <= this.getHeight()-20)
+					: (enemy.getY() < this.y && this.y - enemy.getY() < enemy.getHeight())||
+					(enemy.getY()>=this.y)&&(enemy.getY()-this.y<this.getHeight()-20);//TODO 判断敌人在mario下面时的死亡状态
 			if (xCondition && yCondition) {
 				return true;
 			}
+		}
 		}
 		return false;
 	}
@@ -263,7 +296,7 @@ public class Mario extends Role implements Runnable {
 	 * 死亡后处理方法
 	 */
 	@Override
-	protected synchronized void afterDead() {
+	protected  void afterDead() {
 		if (life > 0) {
 			life--;
 			this.init();
@@ -284,23 +317,11 @@ public class Mario extends Role implements Runnable {
 			return false;
 		return super.isStriken();
 	}
-    @Override
-    protected synchronized boolean isOnland() {
-    	// 判断是否在地面
-		for (Obstruction obstruction : nowScene.getAllObstructions()) {
-			boolean xCondition = (obstruction.getX() >= this.x && obstruction.getX() - this.x < this.getWidth())
-					|| (obstruction.getX() <= this.x && this.x - obstruction.getX() < obstruction.getWidth());
-
-			if ((obstruction.getY() > this.y && obstruction.getY() - this.y <= this.height) && xCondition) {
-				return true;
-			}
-		}
-		return false;
-    }
 	/**
 	 * 根据状态显示图片，注意移动的时候图片要不断切换
 	 */
-	private void showImageWithStatus() {
+	@Override
+	protected void showImageWithStatus() {
 		if (status.equals("rightMove")) {
 			posture = (++posture) % 5;
 		} else if (status.equals("leftMove")) {
@@ -335,8 +356,11 @@ public class Mario extends Role implements Runnable {
 				eatFood();
 				// 修改当前场景
 				fixScene();
+				// 是否撞击到障碍物
+				boolean striken = isStriken();
 				// 修改mario和障碍物的距离
-				fixDistance();
+				if (!striken) 
+				fixDistance();		
 				// 根据状态显示图片
 				showImageWithStatus();
 
@@ -346,19 +370,20 @@ public class Mario extends Role implements Runnable {
 				boolean canRight = isCanRight();
 				// 是否着陆的标志
 				boolean onland = isOnland();
-				// 是否撞击到障碍物
-				boolean striken = isStriken();
+
 				if (canLeft && status.equals("leftMove") || canRight && status.equals("rightMove"))
 					methods.get(status).invoke(this);
 				// 处于上升状态时
 				if (isJumping) {
+					//如果撞到障碍物
 					if (striken) {
 						isJumping = false;
 						isFalling = true;
 
 					}
+					//如果处于二级跳跃
 					if (isSecondJumping) {
-					 this.maxJumpHeight=200;
+					 this.maxJumpHeight=210;
 					 isSecondJumping=false;
 					}
 					// 如果还未跳跃到上升高度
@@ -369,9 +394,9 @@ public class Mario extends Role implements Runnable {
 						isFalling = true;
 					}
 				}
-				// 处于下落状态时
+				// 处于下落状态时 :
+				//1走到没有障碍物的地方 2跳跃后下落
 				if ((!onland && !isJumping) || isFalling) {
-					isSecondJumping=false;
 					maxJumpHeight=120;
 					// 如果还未落到地上
 					if (!onland) {
@@ -382,9 +407,9 @@ public class Mario extends Role implements Runnable {
 						jumpedHeight = 0;
 					}
 				}
-			
 			}
-		} catch (IllegalAccessException e1) {
+		}
+		catch (IllegalAccessException e1) {
 
 			e1.printStackTrace();
 		} catch (InvocationTargetException e1) {

@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import com.config.ScenesConfig;
-import com.gameobject.GameObject;
-import com.gameobject.Obstruction;
-import com.role.Enemy;
-import com.role.Mario;
+import com.gameObject.GameObject;
+import com.gameObject.creature.Enemy;
+import com.gameObject.creature.Mario;
+import com.gameObject.lifelessObject.Obstruction;
 
 public class Scene {
 //场景x坐标

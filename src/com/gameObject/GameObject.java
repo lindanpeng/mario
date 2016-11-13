@@ -1,14 +1,16 @@
-package com.gameobject;
+package com.gameObject;
 
 import java.awt.image.BufferedImage;
-
-import com.ui.Img;
-
+/**
+ * 游戏所有对象的父类
+ * @author 林丹
+ *
+ */
 public abstract class GameObject {
 	//起始x坐标
-	private int startX;
+	protected int startX;
 	//起始y坐标
-	private int startY;
+	protected int startY;
 	//x坐标
 	protected int x;
 	//y坐标

@@ -1,4 +1,4 @@
-package com.ui;
+package com.resource;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -47,7 +47,7 @@ public class Img {
 	public static List<BufferedImage> allTurtleImage = new ArrayList<>();
 	// 障碍物图片
 	public static List<BufferedImage> allObstructionImage = new ArrayList<>();
-	public static final int MONSTER_IMAGES_NUM=73;
+	public static final int MONSTER_IMAGES_NUM=42;
 	public static final int STARTBTN_IMAGES_NUM=3;
 	public static final int ABOUNTBTN_IMAGES_NUM=3;
 	// mario图片数量

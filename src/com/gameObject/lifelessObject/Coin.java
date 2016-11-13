@@ -1,7 +1,12 @@
-package com.gameobject;
+package com.gameObject.lifelessObject;
 
-import com.ui.Img;
-
+import com.gameObject.GameObject;
+import com.resource.Img;
+/**
+ * 金币类
+ * @author 林丹
+ *
+ */
 public class Coin extends GameObject{
 public Coin(int x,int y){
 	super(x, y);

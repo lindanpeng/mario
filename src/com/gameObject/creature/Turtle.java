@@ -1,9 +1,10 @@
-package com.role;
+package com.gameObject.creature;
 
+import com.config.EnemyConfig;
 import com.config.SystemConfig;
 import com.constant.DeadType;
 import com.controller.GameController;
-import com.ui.Img;
+import com.resource.Img;
 /**
  * 乌龟敌人
  * 
@@ -26,12 +27,11 @@ public class Turtle extends Enemy {
 	public void init() {
 		super.init();
 		isRightMoving = true;
+		xspeed=EnemyConfig.DEFAULT_YSPEED;
 		posture = 0;
-		xspeed = 5;
-		this.yspeed = 10;
 	}
 
-	private void showImageWithStatus() {
+	protected void showImageWithStatus() {
 		if (!isDead) {
 			if (!isRightMoving) {
 				posture = (++posture) % 6;
@@ -68,7 +68,7 @@ public class Turtle extends Enemy {
 	@Override
 	protected void afterDead() {
 		isDead = true;
-		xspeed = 10;
+		xspeed=5;
 	}
 
 	@Override
@@ -96,10 +96,10 @@ public class Turtle extends Enemy {
 				}
 				fixDistance();
 				// 是否可以左向移动的标志
-				boolean canLeft = isCanLeft() && this.x >= nowScene.getX();
+				boolean canLeft = isCanLeft() && this.x >= nowScene.getX()&&(isDead?true:hasObUnderLeft());
 				// 是否可以右向移动的标志
-				boolean canRight = isCanRight() && this.x < nowScene.getX() + nowScene.getWidth() - this.width;
-
+				boolean canRight = isCanRight() && this.x < nowScene.getX() + nowScene.getWidth() - this.width&&(isDead?true:hasObUnderRight());
+                
 				if (canRight && isRightMoving)
 					rightMove();
 				else if (canLeft && !isRightMoving)

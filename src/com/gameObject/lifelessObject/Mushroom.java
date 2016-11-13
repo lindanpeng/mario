@@ -1,7 +1,12 @@
-package com.gameobject;
+package com.gameObject.lifelessObject;
 
-import com.ui.Img;
-
+import com.gameObject.GameObject;
+import com.resource.Img;
+/**
+ * 蘑菇类
+ * @author 林丹
+ *
+ */
 public class Mushroom extends GameObject{
 
 	public Mushroom(int x, int y) {

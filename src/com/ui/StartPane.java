@@ -3,10 +3,9 @@ package com.ui;
 import java.awt.Graphics;
 
 import javax.swing.JButton;
-import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
-import com.controller.GameController;
+import com.resource.Img;
 
 /**
  * 游戏开始面板
@@ -15,6 +14,8 @@ import com.controller.GameController;
  *
  */
 public class StartPane extends JPanel {
+
+	private static final long serialVersionUID = 1L;
 	// 开始按钮
 	private JButton startBtn;
 	// 说明按钮
