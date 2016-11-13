@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<game windowWidth="954" windowHeight="680" title="超级玛丽" sleepTime="30"
+	endX="780" autoMoveX="600">
+	<Role RoleWidth="60" RolehHeight="60" xpseed="10" yspeed="10"></Role>
+	<mario xspeed="5" yspeed="8" life="10" x="0" y="0" defaultWidth="50"
+		defaultHeight="50" bigWidth="60" bigHeight="60">
+	</mario>
+	<Enemy xspeed="2" yspeed="3" width="60" height="60"></Enemy>
+	<scenes width="900" height="600" xspeed="5">
+		<scene sort="1">
+			<enemies>
+				<enemy className="com.gameObject.creature.Flower" x="750" y="420" />
+			</enemies>
+			<obstructions>
+			    <obstruction x="0" y="540" type="1" />
+				<obstruction x="120" y="540" type="1" />
+				<obstruction x="420" y="540" type="1" />
+				<obstruction x="540" y="540" type="1" />
+				<obstruction x="720" y="540" type="1" />
+				<obstruction x="780" y="540" type="1" />
+				<obstruction x="840" y="540" type="1" />
+				<obstruction x="720" y="420" type="2" />
+				<obstruction x="780" y="420" type="3" />
+				<obstruction x="720" y="480" type="4" />
+				<obstruction x="780" y="480" type="5" />
+				<obstruction x="180" y="360" type="7" />
+				<obstruction x="180" y="120" type="7" />
+				<obstruction x="240" y="120" type="7" />
+				<obstruction x="0" y="360" type="6" />
+			</obstructions>
+		</scene>
+		<scene sort="2">
+			<enemies>
+				<enemy className="com.gameObject.creature.Triangle" x="240" y="480" />
+				<enemy className="com.gameObject.creature.Triangle" x="720" y="480" />
+			</enemies>
+			<obstructions>
+				<obstruction x="0" y="540" type="1" />
+				<obstruction x="60" y="540" type="1" />
+				<obstruction x="120" y="540" type="1" />
+				<obstruction x="180" y="540" type="1" />
+				<obstruction x="240" y="540" type="1" />
+				<obstruction x="300" y="540" type="1" />
+				<obstruction x="360" y="540" type="1" />
+				<obstruction x="420" y="540" type="1" />
+				<obstruction x="480" y="540" type="1" />
+				<obstruction x="720" y="540" type="1" />
+				<obstruction x="780" y="540" type="1" />
+				<obstruction x="840" y="540" type="1" />
+				<obstruction x="360" y="180" type="6" />
+				<obstruction x="60" y="480" type="8" />
+				<obstruction x="180" y="360" type="8" />
+				<obstruction x="180" y="420" type="8" />
+				<obstruction x="180" y="480" type="8" />
+				<obstruction x="360" y="360" type="8" />
+				<obstruction x="360" y="420" type="8" />
+				<obstruction x="360" y="480" type="8" />
+				<obstruction x="840" y="480" type="8" />
+			</obstructions>
+		</scene>
+		<scene sort="3">
+			<enemies>
+				<enemy className="com.gameObject.creature.Triangle" x="360" y="480" />
+				<enemy className="com.gameObject.creature.Turtle" x="480" y="480" />
+				<enemy className="com.gameObject.creature.Flower" x="750" y="420" />
+			</enemies>
+			<obstructions>
+			    <obstruction x="120" y="540" type="1" />
+				<obstruction x="180" y="540" type="1" />
+				<obstruction x="240" y="540" type="1" />
+				<obstruction x="300" y="540" type="1" />
+				<obstruction x="360" y="540" type="1" />
+				<obstruction x="420" y="540" type="1" />
+				<obstruction x="480" y="540" type="1" />
+				<obstruction x="540" y="540" type="1" />
+				<obstruction x="600" y="540" type="1" />
+				<obstruction x="660" y="540" type="1" />
+				<obstruction x="720" y="540" type="1" />
+				<obstruction x="780" y="540" type="1" />
+				<obstruction x="180" y="420" type="2" />
+				<obstruction x="240" y="420" type="3" />
+				<obstruction x="180" y="480" type="4" />
+				<obstruction x="240" y="480" type="5" />
+				<obstruction x="720" y="420" type="2" />
+				<obstruction x="780" y="420" type="3" />
+				<obstruction x="720" y="480" type="4" />
+				<obstruction x="780" y="480" type="5" />
+				<obstruction x="300" y="180" type="7" />
+				<obstruction x="540" y="180" type="7" />
+				<obstruction x="360" y="240" type="7" />
+				<obstruction x="420" y="240" type="7" />
+				<obstruction x="480" y="240" type="7" />
+				<obstruction x="300" y="240" type="7" />
+				<obstruction x="540" y="240" type="7" />
+			</obstructions>
+		</scene>
+		<scene sort="4">
+			<enemies>
+				<enemy className="com.gameObject.creature.Triangle" x="360" y="300" />
+				<enemy className="com.gameObject.creature.Triangle" x="660" y="360" />
+				<enemy className="com.gameObject.creature.Triangle" x="780" y="240" />
+
+			</enemies>
+			<obstructions>
+				<obstruction x="120" y="540" type="1" />
+				<obstruction x="180" y="540" type="1" />
+				<obstruction x="240" y="540" type="1" />
+				<obstruction x="300" y="540" type="1" />
+				<obstruction x="360" y="540" type="1" />
+				<obstruction x="420" y="540" type="1" />
+				<obstruction x="480" y="540" type="1" />
+				<obstruction x="540" y="540" type="1" />
+				<obstruction x="600" y="540" type="1" />
+				<obstruction x="660" y="540" type="1" />
+				<obstruction x="720" y="540" type="1" />
+				<obstruction x="780" y="540" type="1" />
+				<obstruction x="840" y="540" type="1" />
+				<obstruction x="600" y="480" type="7" />
+				<obstruction x="660" y="480" type="7" />
+				<obstruction x="720" y="480" type="7" />
+				<obstruction x="780" y="480" type="7" />
+				<obstruction x="840" y="480" type="7" />
+				<obstruction x="660" y="420" type="7" />
+				<obstruction x="720" y="420" type="7" />
+				<obstruction x="780" y="420" type="7" />
+				<obstruction x="840" y="420" type="7" />
+				<obstruction x="720" y="360" type="7" />
+				<obstruction x="780" y="360" type="7" />
+				<obstruction x="840" y="360" type="7" />
+				<obstruction x="780" y="300" type="7" />
+				<obstruction x="840" y="300" type="7" />
+				<obstruction x="840" y="240" type="7" />
+				<obstruction x="420" y="360" type="7" />
+				<obstruction x="540" y="360" type="7" />
+				<obstruction x="300" y="300" type="6" />
+				<obstruction x="360" y="360" type="6" />
+			</obstructions>
+		</scene>
+		<scene sort="5">
+			<enemies>
+			</enemies>
+			<obstructions>
+				<obstruction x="120" y="240" type="7" />
+				<obstruction x="120" y="300" type="7" />
+				<obstruction x="120" y="360" type="7" />
+				<obstruction x="120" y="420" type="7" />
+				<obstruction x="120" y="480" type="7" />
+				<obstruction x="120" y="540" type="7" />
+				<obstruction x="300" y="360" type="7" />
+				<obstruction x="300" y="420" type="7" />
+				<obstruction x="300" y="480" type="7" />
+				<obstruction x="300" y="540" type="7" />
+				<obstruction x="540" y="240" type="7" />
+				<obstruction x="540" y="540" type="1" />
+				<obstruction x="600" y="540" type="1" />
+				<obstruction x="660" y="540" type="1" />
+				<obstruction x="720" y="540" type="1" />
+				<obstruction x="780" y="540" type="1" />
+				<obstruction x="840" y="540" type="1" />
+			</obstructions>
+		</scene>
+		<scene sort="6">
+			<enemies>
+			</enemies>
+			<obstructions>
+				<obstruction x="0" y="540" type="1" />
+				<obstruction x="60" y="540" type="1" />
+				<obstruction x="120" y="540" type="1" />
+				<obstruction x="180" y="540" type="1" />
+				<obstruction x="240" y="540" type="1" />
+				<obstruction x="300" y="540" type="1" />
+				<obstruction x="360" y="540" type="1" />
+				<obstruction x="420" y="540" type="1" />
+				<obstruction x="480" y="540" type="1" />
+				<obstruction x="540" y="540" type="1" />
+				<obstruction x="600" y="540" type="1" />
+				<obstruction x="660" y="540" type="1" />
+				<obstruction x="720" y="540" type="1" />
+				<obstruction x="780" y="540" type="1" />
+				<obstruction x="840" y="540" type="1" />
+			</obstructions>
+		</scene>
+	</scenes>
+	<keyController>
+		<jump code="38" />
+		<rigntMove code="39" />
+		<leftMove code="37" />
+		<pause code="16" />
+	</keyController>
+	<messages>
+		<aboutMessage>
+			本游戏由林丹鹏、林创斌、黄贵安、林灿坚（排名不分先后）出品，感谢阿司老师
+			为我们传授了数据结构的相关知识，让我们享受了编程带给我们的快乐
+		</aboutMessage>
+		<gameOverMessage>
+			游戏结束，请问是否要退出游戏?
+		</gameOverMessage>
+		<winMessage>
+			恭喜你通过游戏的所有关卡，请问是否要退出游戏?
+		</winMessage>
+	</messages>
+</game> 
